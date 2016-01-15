@@ -1,6 +1,6 @@
 {
   "name": "jira-client",
-  "version": "1.1.0-docs.4",
+  "version": "1.1.0-docs.5",
   "description": "Wrapper for the JIRA API",
   "author": "Steven Surowiec <steven.surowiec@gmail.com>",
   "contributors": [
@@ -61,7 +61,7 @@
   },
   "release-script": {
     "docsRepo": "git@github.com:jira-node/jira-node.github.io.git",
-    "docsRoot": "docs",
+    "docsRoot": "docs/",
     "tmpDocsRepo": "tmp-docs-repo"
   }
 }
