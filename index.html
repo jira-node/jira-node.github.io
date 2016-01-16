@@ -40,136 +40,63 @@
 </nav>
 
 <div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="javascript-jira-api-for-node-js">JavaScript JIRA API for node.js</h1>
-<p><a href="https://travis-ci.org/node-jira/node-jira-client"><img src="https://travis-ci.org/jira-node/node-jira-client.png?branch=master" alt="Build Status"></a></p>
-<p>A node.js module, which provides an object oriented wrapper for the JIRA REST API.</p>
-<p>This library is built to support version <code>2.0.alpha1</code> of the JIRA REST API.
-This library is also tested with version <code>2</code> of the JIRA REST API.
-  It has been noted that with Jira OnDemand, <code>2.0.alpha1</code> does not work, devs
-  should revert to <code>2</code>. If this changes, please notify us.</p>
-<p>JIRA REST API documentation can be found <a href="http://docs.atlassian.com/jira/REST/latest/">here</a></p>
+<p>A node.js module, which provides an object oriented wrapper for the Jira Rest API.</p>
+<p><a href="https://jira-node.github.io/"><img src="https://img.shields.io/badge/Documentation--green.svg" alt="Documentation"></a>
+<a href="http://docs.atlassian.com/jira/REST/latest/"><img src="https://img.shields.io/badge/Jira%20Rest%20API--green.svg" alt="Jira Rest API"></a>
+<a href="https://travis-ci.org/node-jira/node-jira-client"><img src="https://img.shields.io/travis/jira-node/node-jira-client/master.svg" alt="Build Status"></a></p>
 <h2 id="installation">Installation</h2>
-<p>  Install with the node package manager <a href="http://npmjs.org">npm</a>:</p>
-<pre><code><code class="source-code prettyprint">$ npm install jira-client</code>
-</code></pre><p>or</p>
-<p>  Install via git clone:</p>
-<pre><code><code class="source-code prettyprint">$ git clone git://github.com/node-jira/node-jira-client.git
-$ cd node-jira-client
-$ npm install</code>
-</code></pre><h2 id="examples">Examples</h2>
+<p>Install with the node package manager <a href="http://npmjs.org">npm</a>:</p>
+<pre><code class="lang-shell"><code class="source-code prettyprint">$ npm install jira-client</code>
+</code></pre>
+<h2 id="examples">Examples</h2>
 <h3 id="create-the-jira-client">Create the JIRA client</h3>
-<pre><code><code class="source-code prettyprint">JiraApi = require(&apos;jira-client&apos;).JiraApi;
+<pre><code class="lang-javascript"><code class="source-code prettyprint">// With ES5
+var JiraApi = require(&apos;jira-client&apos;);
 
-var jira = new JiraApi(&apos;https&apos;, config.host, config.port, config.user, config.password, &apos;2.0.alpha1&apos;);</code>
-</code></pre><h3 id="find-the-status-of-an-issue">Find the status of an issue</h3>
-<pre><code><code class="source-code prettyprint">jira.findIssue(issueNumber, function(error, issue) {
+// With ES6
+import JiraApi from &apos;jira-client&apos;;
+
+// Initialize
+var jira = new JiraApi({
+  protocol: &apos;https&apos;,
+  host: &apos;jira.somehost.com&apos;,
+  username: &apos;username&apos;,
+  password: &apos;password&apos;,
+  apiVersion: &apos;2&apos;,
+  strictSSL: true
+});</code>
+</code></pre>
+<h3 id="find-the-status-of-an-issue">Find the status of an issue</h3>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">// ES5
+// We are using an ES5 Polyfill for Promise support. Please note that if you don&apos;t explicitly
+// apply a catch exceptions will get swallowed. Read up on ES6 Promises for further details.
+jira.findIssue(issueNumber)
+  .then(function(issue) {
     console.log(&apos;Status: &apos; + issue.fields.status.name);
-});</code>
-</code></pre><p>Currently there is no explicit login call necessary as each API call uses Basic Authentication to authenticate. </p>
-<h3 id="get-an-issue-remote-links">Get an issue remote links</h3>
-<p>Returns an array of remote links data.</p>
-<pre><code><code class="source-code prettyprint">jira.getRemoteLinks(issueKey, function(err, links) {
-    if (!err) {
-        console.log(issueKey + &apos; has &apos; + links.length + &apos; web links&apos;);
-    }
-});</code>
-</code></pre><h3 id="create-a-remote-link-on-an-issue">Create a remote link on an issue</h3>
-<p>Returns an array of remote links data.</p>
-<pre><code><code class="source-code prettyprint">// create a web link to a GitHub issue
-var linkData = {
-    &quot;object&quot;: {
-        &quot;url&quot; : &quot;https://github.com/node-jira/node-jira-client/issues/1&quot;,
-        &quot;title&quot;: &quot;Add getVersions and createVersion functions&quot;,
-        &quot;icon&quot; : {
-            &quot;url16x16&quot;: &quot;https://github.com/favicon.ico&quot;
-        }
-    }
-};
+  })
+  .catch(function(err) {
+    console.error(err);
+  });
 
-jira.createRemoteLink(issueKey, linkData, function (err, link) {
+// ES6
+jira.findIssue(issueNumber)
+  .then(issue =&gt; {
+    console.log(&apos;Status: &apos; + issue.fields.status.name);
+  })
+  .catch(err =&gt; {
+    console.error(err);
+  });
 
-});</code>
-</code></pre><p>More information can be found by checking <a href="https://developer.atlassian.com/display/JIRADEV/JIRA+REST+API+for+Remote+Issue+Links#JIRARESTAPIforRemoteIssueLinks-CreatingLinks">JIRA Developer documentation</a>.</p>
-<h2 id="options">Options</h2>
-<p>JiraApi options:</p>
-<ul>
-<li><code>protocol&lt;string&gt;</code>: Typically &apos;http:&apos; or &apos;https:&apos;</li>
-<li><code>host&lt;string&gt;</code>: The hostname for your jira server</li>
-<li><code>port&lt;int&gt;</code>: The port your jira server is listening on (probably <code>80</code> or <code>443</code>)</li>
-<li><code>user&lt;string&gt;</code>: The username to log in with</li>
-<li><code>password&lt;string&gt;</code>: Keep it secret, keep it safe</li>
-<li><code>Jira API Version&lt;string&gt;</code>: Known to work with <code>2</code> and <code>2.0.alpha1</code></li>
-<li><code>verbose&lt;bool&gt;</code>: Log some info to the console, usually for debugging</li>
-<li><code>strictSSL&lt;bool&gt;</code>: Set to false if you have self-signed certs or something non-trustworthy</li>
-<li><code>oauth</code>: A dictionary of <code>consumer_key</code>, <code>consumer_secret</code>, <code>access_token</code> and <code>access_token_secret</code> to be used for OAuth authentication.</li>
-<li><code>base&lt;string&gt;</code>: A base slug if your JIRA instance is not at the root of <code>host</code></li>
-</ul>
-<h2 id="implemented-apis">Implemented APIs</h2>
-<ul>
-<li>Authentication<ul>
-<li>HTTP</li>
-<li>OAuth</li>
-</ul>
-</li>
-<li>Projects<ul>
-<li>Pulling a project</li>
-<li>List all projects viewable to the user</li>
-<li>List Components</li>
-<li>List Fields</li>
-<li>List Priorities</li>
-</ul>
-</li>
-<li>Versions<ul>
-<li>Pulling versions</li>
-<li>Adding a new version</li>
-<li>Pulling unresolved issues count for a specific version</li>
-</ul>
-</li>
-<li>Rapid Views<ul>
-<li>Find based on project name</li>
-<li>Get the latest Green Hopper sprint</li>
-<li>Gets attached issues</li>
-</ul>
-</li>
-<li>Issues<ul>
-<li>Add a new issue</li>
-<li>Update an issue</li>
-<li>Add watcher to an issue</li>
-<li>Transition an issue</li>
-<li>Pulling an issue</li>
-<li>Issue linking</li>
-<li>Add an issue to a sprint</li>
-<li>Get a users issues (open or all)</li>
-<li>List issue types</li>
-<li>Search using jql<ul>
-<li>Set Max Results</li>
-<li>Set Start-At parameter for results</li>
-</ul>
-</li>
-<li>Add a worklog</li>
-<li>Delete a worklog</li>
-<li>Add new estimate for worklog</li>
-<li>Add a comment</li>
-<li>Remote links (aka Web Links)<ul>
-<li>Create a remote link on an issue</li>
-<li>Get all remote links of an issue</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Transitions<ul>
-<li>List</li>
-</ul>
-</li>
-<li>Users<ul>
-<li>Search</li>
-</ul>
-</li>
-</ul>
-<h2 id="todo">TODO</h2>
-<ul>
-<li>Refactor currently implemented APIs to be more Object Oriented</li>
-<li>Refactor to make use of built-in node.js events and classes</li>
-</ul>
+// ES7
+async function logIssueName() {
+  try {
+    const issue = await jira.findIssue(issueNumber);
+    console.log(&apos;Status: &apos; + issue.fields.status.name);
+  } catch (err) {
+    console.error(err);
+  }
+}</code>
+</code></pre>
 </div>
 </div>
 
