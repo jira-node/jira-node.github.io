@@ -396,6 +396,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/jira.js~jiraapi#baseoptions",
+    "class/src/jira.js~JiraApi.html#instance-member-baseOptions",
+    "src/jira.js~JiraApi#baseOptions",
+    "member"
+  ],
+  [
     "src/jira.js~jiraapi#constructor",
     "class/src/jira.js~JiraApi.html#instance-constructor-constructor",
     "src/jira.js~JiraApi#constructor",
@@ -564,6 +570,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#liststatus",
+    "class/src/jira.js~JiraApi.html#instance-method-listStatus",
+    "src/jira.js~JiraApi#listStatus",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#listtransitions",
     "class/src/jira.js~JiraApi.html#instance-method-listTransitions",
     "src/jira.js~JiraApi#listTransitions",
@@ -586,12 +598,6 @@ window.esdocSearchIndex = [
     "class/src/jira.js~JiraApi.html#instance-method-makeUri",
     "src/jira.js~JiraApi#makeUri",
     "method"
-  ],
-  [
-    "src/jira.js~jiraapi#password",
-    "class/src/jira.js~JiraApi.html#instance-member-password",
-    "src/jira.js~JiraApi#password",
-    "member"
   ],
   [
     "src/jira.js~jiraapi#port",
@@ -652,12 +658,6 @@ window.esdocSearchIndex = [
     "class/src/jira.js~JiraApi.html#instance-method-updateVersion",
     "src/jira.js~JiraApi#updateVersion",
     "method"
-  ],
-  [
-    "src/jira.js~jiraapi#username",
-    "class/src/jira.js~JiraApi.html#instance-member-username",
-    "src/jira.js~JiraApi#username",
-    "member"
   ],
   [
     "src/jira.js~jiraapi.jiraapioptions",

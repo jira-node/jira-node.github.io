@@ -59,13 +59,23 @@ export default class JiraApi {
     this.protocol = options.protocol || &apos;http&apos;;
     this.host = options.host;
     this.port = options.port || 80;
-    this.username = options.username;
-    this.password = options.password;
     this.apiVersion = options.apiVersion || &apos;2&apos;;
     this.base = options.base || &apos;&apos;;
     this.strictSSL = options.strictSSL || true;
       // This is so we can fake during unit tests
     this.request = options.request || request;
+    this.baseOptions = {};
+
+    if (options.username &amp;&amp; options.password) {
+      this.baseOptions.auth = {
+        user: options.username,
+        pass: options.password
+      };
+    }
+
+    if (options.timeout) {
+      this.baseOptions.timeout = options.timeout;
+    }
   }
 
   /**
@@ -89,6 +99,11 @@ export default class JiraApi {
    * authenticated?  Defaults to true.
    * @property {function} [request] - What method does this tool use to make its requests?
    * Defaults to request from request-promise
+   * @property {number} [timeout] - Integer containing the number of milliseconds to wait for a
+   * server to send response headers (and start the response body) before aborting the request. Note
+   * that if the underlying TCP connection cannot be established, the OS-wide TCP connection timeout
+   * will overrule the timeout option ([the default in Linux can be anywhere from 20-120 *
+   * seconds](http://www.sekuda.com/overriding_the_default_linux_kernel_20_second_tcp_socket_connect_timeout)).
    */
 
   /**
@@ -131,26 +146,19 @@ export default class JiraApi {
    * @param {object} requestOptions - fields on this object get posted as a request header for
    * requests to jira
    */
-  doRequest(requestOptions) {
-    let options = requestOptions;
-    if (this.username &amp;&amp; this.password) {
-      options = {
-        auth: {
-          user: this.username,
-          pass: this.password
-        },
-        ...requestOptions
-      };
+  async doRequest(requestOptions) {
+    const options = {
+      ...this.baseOptions,
+      ...requestOptions
+    };
+
+    const response = await this.request(options);
+
+    if (Array.isArray(response.errorMessages) &amp;&amp; response.errorMessages.length &gt; 0) {
+      throw new Error(response.errorMessages.join(&apos;, &apos;));
     }
 
-    return this.request(options)
-      .then(response =&gt; {
-        if (Array.isArray(response.errorMessages) &amp;&amp; response.errorMessages.length &gt; 0) {
-          throw new Error(response.errorMessages.join(&apos;, &apos;));
-        }
-
-        return response;
-      });
+    return response;
   }
 
   /**
@@ -172,9 +180,10 @@ export default class JiraApi {
    * @param {string} version - the version of your product you want to find the unresolved
    * issues of.
    */
-  getUnresolvedIssueCount(version) {
-    return this.doRequest(this.makeRequestHeader(`/version/${version}/unresolvedIssueCount`))
-      .then(response =&gt; response.issuesUnresolvedCount);
+  async getUnresolvedIssueCount(version) {
+    const requestHeaders = this.makeRequestHeader(`/version/${version}/unresolvedIssueCount`);
+    const response = await this.doRequest(requestHeaders);
+    return response.issuesUnresolvedCount;
   }
 
   /**
@@ -193,13 +202,13 @@ export default class JiraApi {
    * @function
    * @param {string} projectName - name for the project
    */
-  findRapidView(projectName) {
-    return this.doRequest(this.makeRequestHeader(&apos;/rapidviews/list&apos;))
-      .then(response =&gt; {
-        const rapidViewResult = response.views
-          .filter(x =&gt; x.name.toLowerCase() === projectName.toLowerCase());
-        return rapidViewResult[0];
-      });
+  async findRapidView(projectName) {
+    const response = await this.doRequest(this.makeRequestHeader(&apos;/rapidviews/list&apos;));
+
+    const rapidViewResult = response.views
+      .filter(x =&gt; x.name.toLowerCase() === projectName.toLowerCase());
+
+    return rapidViewResult[0];
   }
 
   /** Get a list of Sprints belonging to a Rapid View
@@ -207,11 +216,9 @@ export default class JiraApi {
    * @function
    * @param {string} rapidViewId - the id for the rapid view
    */
-  getLastSprintForRapidView(rapidViewId) {
-    return this.doRequest(this.makeRequestHeader(`/sprintquery/${rapidViewId}`))
-      .then(response =&gt; {
-        return response.sprints.pop();
-      });
+  async getLastSprintForRapidView(rapidViewId) {
+    const response = await this.doRequest(this.makeRequestHeader(`/sprintquery/${rapidViewId}`));
+    return response.sprints.pop();
   }
 
   /** Get the issues for a rapidView / sprint
@@ -671,8 +678,8 @@ export default class JiraApi {
     }));
   }
 
-
   /** Add attachment to a Issue
+   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)
    * @name addAttachmentOnIssue
    * @function
    * @param {string} issueId - issue id
@@ -690,6 +697,14 @@ export default class JiraApi {
     }));
   }
 
+  /** Get list of possible statuses
+   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)
+   * @name listStatus
+   * @function
+   */
+  listStatus() {
+    return this.doRequest(this.makeRequestHeader(`/status`));
+  }
 }
 </code></pre>
 

@@ -176,7 +176,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-member-host">host</a></span></span><span data-ice="signature">: <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-member-baseOptions">baseOptions</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -201,7 +201,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-member-password">password</a></span></span><span data-ice="signature">: <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-member-host">host</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -315,31 +315,6 @@
       
     </td>
   </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-           <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-member-username">username</a></span></span><span data-ice="signature">: <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
 </tbody>
 </table>
 </div>
@@ -364,7 +339,8 @@
       <div>
         
         
-        <div data-ice="description"><p>Add attachment to a Issue</p>
+        <div data-ice="description"><p>Add attachment to a Issue
+<a href="https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment">Jira Doc</a></p>
 </div>
       </div>
     </td>
@@ -1228,6 +1204,33 @@
     <td>
       <div>
         <p>
+           <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-listStatus">listStatus</a></span></span><span data-ice="signature">(): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Get list of possible statuses
+<a href="https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses">Jira Doc</a></p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
            <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-listTransitions">listTransitions</a></span></span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
         </p>
       </div>
@@ -1563,7 +1566,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber22">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber20">source</a></span></span>
     </span>
   </h3>
 
@@ -1603,7 +1606,47 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber23">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber21">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-baseOptions">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    <span data-ice="name">baseOptions</span><span data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber25">source</a></span></span>
     </span>
   </h3>
 
@@ -1644,46 +1687,6 @@
       
       
       <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber18">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-password">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">password</span><span data-ice="signature">: <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber21">source</a></span></span>
     </span>
   </h3>
 
@@ -1803,7 +1806,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber26">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber24">source</a></span></span>
     </span>
   </h3>
 
@@ -1843,47 +1846,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber24">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-member-username">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">username</span><span data-ice="signature">: <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber20">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber22">source</a></span></span>
     </span>
   </h3>
 
@@ -1926,14 +1889,15 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber639">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber646">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Add attachment to a Issue</p>
+  <div data-ice="description"><p>Add attachment to a Issue
+<a href="https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment">Jira Doc</a></p>
 </div>
 
   
@@ -2001,7 +1965,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber516">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber523">source</a></span></span>
     </span>
   </h3>
 
@@ -2077,7 +2041,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber196">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber203">source</a></span></span>
     </span>
   </h3>
 
@@ -2152,7 +2116,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber432">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber439">source</a></span></span>
     </span>
   </h3>
 
@@ -2221,7 +2185,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber366">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber373">source</a></span></span>
     </span>
   </h3>
 
@@ -2290,7 +2254,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber380">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber387">source</a></span></span>
     </span>
   </h3>
 
@@ -2365,7 +2329,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber534">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber541">source</a></span></span>
     </span>
   </h3>
 
@@ -2448,7 +2412,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber235">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber242">source</a></span></span>
     </span>
   </h3>
 
@@ -2522,7 +2486,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber258">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber265">source</a></span></span>
     </span>
   </h3>
 
@@ -2591,7 +2555,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber446">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber453">source</a></span></span>
     </span>
   </h3>
 
@@ -2660,7 +2624,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber394">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber401">source</a></span></span>
     </span>
   </h3>
 
@@ -2729,7 +2693,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber604">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber611">source</a></span></span>
     </span>
   </h3>
 
@@ -2798,7 +2762,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber550">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber557">source</a></span></span>
     </span>
   </h3>
 
@@ -2874,7 +2838,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber92">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber107">source</a></span></span>
     </span>
   </h3>
 
@@ -2942,7 +2906,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber121">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber129">source</a></span></span>
     </span>
   </h3>
 
@@ -3009,7 +2973,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber154">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber163">source</a></span></span>
     </span>
   </h3>
 
@@ -3077,7 +3041,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber624">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber631">source</a></span></span>
     </span>
   </h3>
 
@@ -3145,7 +3109,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber615">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber622">source</a></span></span>
     </span>
   </h3>
 
@@ -3197,7 +3161,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber168">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber177">source</a></span></span>
     </span>
   </h3>
 
@@ -3265,7 +3229,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber145">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber154">source</a></span></span>
     </span>
   </h3>
 
@@ -3332,7 +3296,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber224">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber231">source</a></span></span>
     </span>
   </h3>
 
@@ -3400,7 +3364,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber181">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber188">source</a></span></span>
     </span>
   </h3>
 
@@ -3475,7 +3439,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber133">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber141">source</a></span></span>
     </span>
   </h3>
 
@@ -3543,7 +3507,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber339">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber346">source</a></span></span>
     </span>
   </h3>
 
@@ -3627,7 +3591,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber354">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber361">source</a></span></span>
     </span>
   </h3>
 
@@ -3703,7 +3667,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber248">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber255">source</a></span></span>
     </span>
   </h3>
 
@@ -3772,7 +3736,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber594">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber601">source</a></span></span>
     </span>
   </h3>
 
@@ -3841,7 +3805,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber211">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber218">source</a></span></span>
     </span>
   </h3>
 
@@ -3909,7 +3873,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber422">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber429">source</a></span></span>
     </span>
   </h3>
 
@@ -3978,7 +3942,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber458">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber465">source</a></span></span>
     </span>
   </h3>
 
@@ -4030,7 +3994,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber562">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber569">source</a></span></span>
     </span>
   </h3>
 
@@ -4082,7 +4046,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber467">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber474">source</a></span></span>
     </span>
   </h3>
 
@@ -4134,7 +4098,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber505">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber512">source</a></span></span>
     </span>
   </h3>
 
@@ -4143,6 +4107,58 @@ issues of.</p>
   
   <div data-ice="description"><p>List all Viewable Projects
 <a href="http://docs.atlassian.com/jira/REST/latest/#id289193">Jira Doc</a></p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tr>
+        <td class="return-type" data-ice="returnType"><span>*</span></td>
+        
+      </tr>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-listStatus">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    <span data-ice="name">listStatus</span><span data-ice="signature">(): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber663">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Get list of possible statuses
+<a href="https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses">Jira Doc</a></p>
 </div>
 
   
@@ -4186,7 +4202,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber477">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber484">source</a></span></span>
     </span>
   </h3>
 
@@ -4255,7 +4271,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber584">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber591">source</a></span></span>
     </span>
   </h3>
 
@@ -4307,7 +4323,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber59">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber74">source</a></span></span>
     </span>
   </h3>
 
@@ -4380,7 +4396,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber75">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber90">source</a></span></span>
     </span>
   </h3>
 
@@ -4447,7 +4463,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber572">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber579">source</a></span></span>
     </span>
   </h3>
 
@@ -4516,7 +4532,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber290">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber297">source</a></span></span>
     </span>
   </h3>
 
@@ -4615,7 +4631,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber307">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber314">source</a></span></span>
     </span>
   </h3>
 
@@ -4683,7 +4699,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber492">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber499">source</a></span></span>
     </span>
   </h3>
 
@@ -4759,7 +4775,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber408">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber415">source</a></span></span>
     </span>
   </h3>
 
@@ -4835,7 +4851,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber272">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber279">source</a></span></span>
     </span>
   </h3>
 

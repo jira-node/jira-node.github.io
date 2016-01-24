@@ -205,6 +205,17 @@ authenticated?  Defaults to true.</p>
 Defaults to request from request-promise</p>
 </td>
     </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">timeout</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
+      <td data-ice="appendix"><ul><li>optional</li></ul></td>
+      <td data-ice="description"><p>Integer containing the number of milliseconds to wait for a
+server to send response headers (and start the response body) before aborting the request. Note
+that if the underlying TCP connection cannot be established, the OS-wide TCP connection timeout
+will overrule the timeout option (<a href="http://www.sekuda.com/overriding_the_default_linux_kernel_20_second_tcp_socket_connect_timeout">the default in Linux can be anywhere from 20-120 *
+seconds</a>).</p>
+</td>
+    </tr>
 </tbody>
   </table>
 </div>

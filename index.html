@@ -43,7 +43,7 @@
 <p>A node.js module, which provides an object oriented wrapper for the Jira Rest API.</p>
 <p><a href="https://jira-node.github.io/"><img src="https://img.shields.io/badge/Documentation--green.svg" alt="Documentation"></a>
 <a href="http://docs.atlassian.com/jira/REST/latest/"><img src="https://img.shields.io/badge/Jira%20Rest%20API--green.svg" alt="Jira Rest API"></a>
-<a href="https://travis-ci.org/node-jira/node-jira-client"><img src="https://img.shields.io/travis/jira-node/node-jira-client/master.svg" alt="Build Status"></a></p>
+<a href="https://travis-ci.org/jira-node/node-jira-client"><img src="https://img.shields.io/travis/jira-node/node-jira-client/master.svg" alt="Build Status"></a></p>
 <h2 id="installation">Installation</h2>
 <p>Install with the node package manager <a href="http://npmjs.org">npm</a>:</p>
 <pre><code class="lang-shell"><code class="source-code prettyprint">$ npm install jira-client</code>
@@ -81,7 +81,7 @@ jira.findIssue(issueNumber)
 // ES6
 jira.findIssue(issueNumber)
   .then(issue =&gt; {
-    console.log(&apos;Status: &apos; + issue.fields.status.name);
+    console.log(`Status: ${issue.fields.status.name}`);
   })
   .catch(err =&gt; {
     console.error(err);
@@ -91,7 +91,7 @@ jira.findIssue(issueNumber)
 async function logIssueName() {
   try {
     const issue = await jira.findIssue(issueNumber);
-    console.log(&apos;Status: &apos; + issue.fields.status.name);
+    console.log(`Status: ${issue.fields.status.name}`);
   } catch (err) {
     console.error(err);
   }
