@@ -432,6 +432,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#deleteversion",
+    "class/src/jira.js~JiraApi.html#instance-method-deleteVersion",
+    "src/jira.js~JiraApi#deleteVersion",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#deletewebhook",
     "class/src/jira.js~JiraApi.html#instance-method-deleteWebhook",
     "src/jira.js~JiraApi#deleteWebhook",
@@ -600,6 +606,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#makewebhookuri",
+    "class/src/jira.js~JiraApi.html#instance-method-makeWebhookUri",
+    "src/jira.js~JiraApi#makeWebhookUri",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#port",
     "class/src/jira.js~JiraApi.html#instance-member-port",
     "src/jira.js~JiraApi#port",
@@ -660,15 +672,33 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#webhookversion",
+    "class/src/jira.js~JiraApi.html#instance-member-webhookVersion",
+    "src/jira.js~JiraApi#webhookVersion",
+    "member"
+  ],
+  [
     "src/jira.js~jiraapi.jiraapioptions",
     "typedef/index.html#static-typedef-JiraApiOptions",
     "src/jira.js~JiraApi.JiraApiOptions",
     "typedef"
   ],
   [
+    "src/jira.js~jiraapi.oauth",
+    "typedef/index.html#static-typedef-OAuth",
+    "src/jira.js~JiraApi.OAuth",
+    "typedef"
+  ],
+  [
     "src/jira.js~jiraapi.searchuseroptions",
     "typedef/index.html#static-typedef-SearchUserOptions",
     "src/jira.js~JiraApi.SearchUserOptions",
+    "typedef"
+  ],
+  [
+    "src/jira.js~jiraapi.makerequestheaderoptions",
+    "typedef/index.html#static-typedef-makeRequestHeaderOptions",
+    "src/jira.js~JiraApi.makeRequestHeaderOptions",
     "typedef"
   ]
 ]
