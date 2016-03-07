@@ -534,6 +534,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#greenhopperversion",
+    "class/src/jira.js~JiraApi.html#instance-member-greenhopperVersion",
+    "src/jira.js~JiraApi#greenhopperVersion",
+    "member"
+  ],
+  [
     "src/jira.js~jiraapi#host",
     "class/src/jira.js~JiraApi.html#instance-member-host",
     "src/jira.js~JiraApi#host",
@@ -597,6 +603,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#makerequestheader",
     "class/src/jira.js~JiraApi.html#instance-method-makeRequestHeader",
     "src/jira.js~JiraApi#makeRequestHeader",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#makesprintqueryuri",
+    "class/src/jira.js~JiraApi.html#instance-method-makeSprintQueryUri",
+    "src/jira.js~JiraApi#makeSprintQueryUri",
     "method"
   ],
   [
