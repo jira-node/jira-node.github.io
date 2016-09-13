@@ -408,6 +408,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#createproject",
+    "class/src/jira.js~JiraApi.html#instance-method-createProject",
+    "src/jira.js~JiraApi#createProject",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#createremotelink",
     "class/src/jira.js~JiraApi.html#instance-method-createRemoteLink",
     "src/jira.js~JiraApi#createRemoteLink",
