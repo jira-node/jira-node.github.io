@@ -588,6 +588,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#listsprints",
+    "class/src/jira.js~JiraApi.html#instance-method-listSprints",
+    "src/jira.js~JiraApi#listSprints",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#liststatus",
     "class/src/jira.js~JiraApi.html#instance-method-listStatus",
     "src/jira.js~JiraApi#listStatus",
