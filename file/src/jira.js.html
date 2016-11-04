@@ -222,6 +222,7 @@ export default class JiraApi {
     };
 
     const response = await this.request(options);
+
     if (response) {
       if (Array.isArray(response.errorMessages) &amp;&amp; response.errorMessages.length &gt; 0) {
         throw new Error(response.errorMessages.join(&apos;, &apos;));
@@ -570,7 +571,7 @@ export default class JiraApi {
   getUsersIssues(username, open) {
     return this.searchJira(
       `assignee = ${username.replace(&apos;@&apos;, &apos;\\u0040&apos;)} ` +
-      `AND status in (Open, &apos;In Progress&apos;, Reopened) ${open}`, {});
+      `AND status in (Open, &apos;In Progress&apos;, Reopened) &quot;${open}&quot;`, {});
   }
 
   /** Add issue to Jira
@@ -773,14 +774,18 @@ export default class JiraApi {
    * @param {object} newEstimate - the new value for the remaining estimate field
    */
   addWorklog(issueId, worklog, newEstimate) {
-    return this.doRequest(this.makeRequestHeader(this.makeUri({
-      pathname: `/issue/${issueId}/worklog`,
-      query: (newEstimate) ? { adjustEstimate: &apos;new&apos;, newEstimate } : null,
-    }), {
+    const header = {
+      uri: this.makeUri({
+        pathname: `/issue/${issueId}/worklog`,
+        query: { adjustEstimate: &apos;new&apos;, newEstimate },
+      }),
       body: worklog,
       method: &apos;POST&apos;,
-      followAllRedirects: true,
-    }));
+      &apos;Content-Type&apos;: &apos;application/json&apos;,
+      json: true,
+    };
+
+    return this.doRequest(header);
   }
 
   /** Delete worklog from issue

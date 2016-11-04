@@ -10,7 +10,7 @@
     "access": null,
     "description": null,
     "lineNumber": 1,
-    "content": "import request from 'request-promise';\nimport url from 'url';\n\n/**\n * @name JiraApi\n * @class\n * Wrapper for the JIRA Rest Api\n * https://docs.atlassian.com/jira/REST/6.4.8/\n */\nexport default class JiraApi {\n  /**\n   * @constructor\n   * @function\n   * @param {JiraApiOptions} options\n   */\n  constructor(options) {\n    this.protocol = options.protocol || 'http';\n    this.host = options.host;\n    this.port = options.port || null;\n    this.apiVersion = options.apiVersion || '2';\n    this.base = options.base || '';\n    this.strictSSL = options.hasOwnProperty('strictSSL') ? options.strictSSL : true;\n      // This is so we can fake during unit tests\n    this.request = options.request || request;\n    this.webhookVersion = options.webHookVersion || '1.0';\n    this.greenhopperVersion = options.greenhopperVersion || '1.0';\n    this.baseOptions = {};\n\n    if (options.oauth && options.oauth.consumer_key && options.oauth.access_token) {\n      this.baseOptions.oauth = {\n        consumer_key: options.oauth.consumer_key,\n        consumer_secret: options.oauth.consumer_secret,\n        token: options.oauth.access_token,\n        token_secret: options.oauth.access_token_secret,\n        signature_method: options.oauth.signature_method || 'RSA-SHA1',\n      };\n    } else if (options.username && options.password) {\n      this.baseOptions.auth = {\n        user: options.username,\n        pass: options.password,\n      };\n    }\n\n    if (options.timeout) {\n      this.baseOptions.timeout = options.timeout;\n    }\n  }\n\n  /**\n   * @typedef JiraApiOptions\n   * @type {object}\n   * @property {string} [protocol=http] - What protocol to use to connect to\n   * jira? Ex: http|https\n   * @property {string} host - What host is this tool connecting to for the jira\n   * instance? Ex: jira.somehost.com\n   * @property {string} [port] - What port is this tool connecting to jira with? Only needed for\n   * none standard ports. Ex: 8080, 3000, etc\n   * @property {string} [username] - Specify a username for this tool to authenticate all\n   * requests with.\n   * @property {string} [password] - Specify a password for this tool to authenticate all\n   * requests with.\n   * @property {string} [apiVersion=2] - What version of the jira rest api is the instance the\n   * tool is connecting to?\n   * @property {string} [base] - What other url parts exist, if any, before the rest/api/\n   * section?\n   * @property {boolean} [strictSSL=true] - Does this tool require each request to be\n   * authenticated?  Defaults to true.\n   * @property {function} [request] - What method does this tool use to make its requests?\n   * Defaults to request from request-promise\n   * @property {number} [timeout] - Integer containing the number of milliseconds to wait for a\n   * server to send response headers (and start the response body) before aborting the request. Note\n   * that if the underlying TCP connection cannot be established, the OS-wide TCP connection timeout\n   * will overrule the timeout option ([the default in Linux can be anywhere from 20-120 *\n   * seconds](http://www.sekuda.com/overriding_the_default_linux_kernel_20_second_tcp_socket_connect_timeout)).\n   * @property {string} [webhookVersion=1.0] - What webhook version does this api wrapper need to\n   * hit?\n   * @property {string} [greenhopperVersion=1.0] - What webhook version does this api wrapper need\n   * to hit?\n   * @property {OAuth} - Specify an oauth object for this tool to authenticate all requests using\n   * OAuth.\n   */\n\n  /**\n   * @typedef OAuth\n   * @type {object}\n   * @property {string} consumer_key - The consumer entered in Jira Preferences.\n   * @property {string} consumer_secret - The private RSA file.\n   * @property {string} access_token - The generated access token.\n   * @property {string} access_token_secret - The generated access toke secret.\n   * @property {string} signature_method [signature_method=RSA-SHA1] - OAuth signurate methode\n   * Possible values RSA-SHA1, HMAC-SHA1, PLAINTEXT. Jira Cloud supports only RSA-SHA1.\n   */\n\n  /**\n   * @name makeRequestHeader\n   * @function\n   * Creates a requestOptions object based on the default template for one\n   * @param {string} uri\n   * @param {object} [options] - an object containing fields and formatting how the\n   */\n  makeRequestHeader(uri, options = {}) {\n    return {\n      rejectUnauthorized: this.strictSSL,\n      method: options.method || 'GET',\n      uri,\n      json: true,\n      ...options,\n    };\n  }\n\n  /**\n   * @typedef makeRequestHeaderOptions\n   * @type {object}\n   * @property {string} [method] - HTTP Request Method. ie GET, POST, PUT, DELETE\n   */\n\n  /**\n   * @name makeUri\n   * @function\n   * Creates a URI object for a given pathname\n   * @param {string} pathname - The url after the /rest/api/version\n   */\n  makeUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/api/${this.apiVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeWebhookUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeWebhookUri({ pathname }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/webhooks/${this.webhookVersion}${pathname}`,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeSprintQueryUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeSprintQueryUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/greenhopper/${this.greenhopperVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name doRequest\n   * @function\n   * Does a request based on the requestOptions object\n   * @param {object} requestOptions - fields on this object get posted as a request header for\n   * requests to jira\n   */\n  async doRequest(requestOptions) {\n    const options = {\n      ...this.baseOptions,\n      ...requestOptions,\n    };\n\n    const response = await this.request(options);\n    if (response) {\n      if (Array.isArray(response.errorMessages) && response.errorMessages.length > 0) {\n        throw new Error(response.errorMessages.join(', '));\n      }\n    }\n\n    return response;\n  }\n\n  /**\n   * @name findIssue\n   * @function\n   * Find an issue in jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290709)\n   * @param {string} issueNumber - The issue number to search for including the project key\n   * @param {string} expand - The resource expansion to return additional fields in the response\n   */\n  findIssue(issueNumber, expand) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}`,\n      query: {\n        expand: expand || '',\n      },\n    })));\n  }\n\n  /**\n   * @name getUnresolvedIssueCount\n   * @function\n   * Get the unresolved issue count\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288524)\n   * @param {string} version - the version of your product you want to find the unresolved\n   * issues of.\n   */\n  async getUnresolvedIssueCount(version) {\n    const requestHeaders = this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/version/${version}/unresolvedIssueCount`,\n      })\n    );\n    const response = await this.doRequest(requestHeaders);\n    return response.issuesUnresolvedCount;\n  }\n\n  /**\n   * @name getProject\n   * @function\n   * Get the Project by project key\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289232)\n   * @param {string} project - key for the project\n   */\n  getProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}`,\n    })));\n  }\n\n/**\n   * @name createProject\n   * @function\n   * Create a new Project\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/project-createProject)\n   * @param {object} project - with specs\n   */\n  createProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project/',\n    }), {\n      method: 'POST',\n      body: project,\n    }));\n  }\n\n  /** Find the Rapid View for a specified project\n   * @name findRapidView\n   * @function\n   * @param {string} projectName - name for the project\n   */\n  async findRapidView(projectName) {\n    const response = await this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapidviews/list',\n    })));\n\n    if (typeof projectName === 'undefined' || projectName === null) return response.views;\n\n    const rapidViewResult = response.views\n      .find(x => x.name.toLowerCase() === projectName.toLowerCase());\n\n    return rapidViewResult;\n  }\n\n  /** Get the most recent sprint for a given rapidViewId\n   * @name getLastSprintForRapidView\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  async getLastSprintForRapidView(rapidViewId) {\n    const response = await this.doRequest(\n      this.makeRequestHeader(this.makeSprintQueryUri({\n        pathname: `/sprintquery/${rapidViewId}`,\n      }))\n    );\n    return response.sprints.pop();\n  }\n\n  /** Get the issues for a rapidView / sprint\n   * @name getSprintIssues\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   * @param {string} sprintId - the id for the sprint\n   */\n  getSprintIssues(rapidViewId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapid/charts/sprintreport',\n      query: {\n        rapidViewId,\n        sprintId,\n      },\n    })));\n  }\n\n  /** Get a list of Sprints belonging to a Rapid View\n   * @name listSprints\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  listSprints(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: `/sprintquery/${rapidViewId}`,\n    })));\n  }\n\n  /** Add an issue to the project's current sprint\n   * @name addIssueToSprint\n   * @function\n   * @param {string} issueId - the id of the existing issue\n   * @param {string} sprintId - the id of the sprint to add it to\n   */\n  addIssueToSprint(issueId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/sprint/${sprintId}/issues/add`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: {\n        issueKeys: [issueId],\n      },\n    }));\n  }\n\n  /** Create an issue link between two issues\n   * @name issueLink\n   * @function\n   * @param {object} link - a link object formatted how the Jira API specifies\n   */\n  issueLink(link) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issueLink',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: link,\n    }));\n  }\n\n  /** Retrieves the remote links associated with the given issue.\n   * @name getRemoteLinks\n   * @function\n   * @param {string} issueNumber - the issue number to find remote links for.\n   */\n  getRemoteLinks(issueNumber) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    })));\n  }\n\n  /**\n   * @name createRemoteLink\n   * @function\n   * Creates a remote link associated with the given issue.\n   * @param {string} issueNumber - The issue number to create the remotelink under\n   * @param {object} remoteLink - the remotelink object as specified by the Jira API\n   */\n  createRemoteLink(issueNumber, remoteLink) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    }), {\n      method: 'POST',\n      body: remoteLink,\n    }));\n  }\n\n  /** Get Versions for a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)\n   * @name getVersions\n   * @function\n   * @param {string} project - A project key to get versions for\n   */\n  getVersions(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/versions`,\n    })));\n  }\n\n  /** Create a version\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)\n   * @name createVersion\n   * @function\n   * @param {string} version - an object of the new version\n   */\n  createVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/version',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Update a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)\n   * @name updateVersion\n   * @function\n   * @param {string} version - an new object of the version to update\n   */\n  updateVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${version.id}`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Delete a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/version-delete)\n   * @name deleteVersion\n   * @function\n   * @param {string} versionId - the ID of the version to delete\n   * @param {string} moveFixIssuesToId - when provided, existing fixVersions will be moved\n   *                 to this ID. Otherwise, the deleted version will be removed from all\n   *                 issue fixVersions.\n   * @param {string} moveAffectedIssuesToId - when provided, existing affectedVersions will\n   *                 be moved to this ID. Otherwise, the deleted version will be removed\n   *                 from all issue affectedVersions.\n   */\n  deleteVersion(versionId, moveFixIssuesToId, moveAffectedIssuesToId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${versionId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n      qs: {\n        moveFixIssuesTo: moveFixIssuesToId,\n        moveAffectedIssuesTo: moveAffectedIssuesToId,\n      },\n    }));\n  }\n\n  /** Pass a search query to Jira\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e4424)\n   * @name searchJira\n   * @function\n   * @param {string} searchString - jira query string in JQL\n   * @param {object} optional - object containing any of the following properties\n   * @param {integer} [optional.startAt=0]: optional starting index number\n   * @param {integer} [optional.maxResults=50]: optional ending index number\n   * @param {array} [optional.fields]: optional array of string names of desired fields\n   */\n  searchJira(searchString, optional = {}) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/search',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: {\n        jql: searchString,\n        ...optional,\n      },\n    }));\n  }\n\n  /** Search user on Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)\n   * @name searchUsers\n   * @function\n   * @param {SearchUserOptions} options\n   */\n  searchUsers({ username, startAt, maxResults, includeActive, includeInactive }) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/user/search',\n      query: {\n        username,\n        startAt: startAt || 0,\n        maxResults: maxResults || 50,\n        includeActive: includeActive || true,\n        includeInactive: includeInactive || false,\n      },\n    }), {\n      followAllRedirects: true,\n    }));\n  }\n\n  /**\n   * @typedef SearchUserOptions\n   * @type {object}\n   * @property {string} username - A query string used to search username, name or e-mail address\n   * @property {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @property {integer} [maxResults=50] - The maximum number of users to return\n   * @property {boolean} [includeActive=true] - If true, then active users are included\n   * in the results\n   * @property {boolean} [includeInactive=false] - If true, then inactive users\n   * are included in the results\n   */\n\n  /** Get all users in group on Jira\n   * @name getUsersInGroup\n   * @function\n   * @param {string} groupname - A query string used to search users in group\n   * @param {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @param {integer} [maxResults=50] - The maximum number of users to return (defaults to 50).\n   */\n  getUsersInGroup(groupname, startAt = 0, maxResults = 50) {\n    return this.doRequest(\n      this.makeRequestHeader(this.makeUri({\n        pathname: '/group',\n        query: {\n          groupname,\n          expand: `users[${startAt}:${maxResults}]`,\n        },\n      }), {\n        followAllRedirects: true,\n      })\n    );\n  }\n\n  /** Get issues related to a user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)\n   * @name getUsersIssues\n   * @function\n   * @param {string} username - username of user to search for\n   * @param {boolean} open - determines if only open issues should be returned\n   */\n  getUsersIssues(username, open) {\n    return this.searchJira(\n      `assignee = ${username.replace('@', '\\\\u0040')} ` +\n      `AND status in (Open, 'In Progress', Reopened) ${open}`, {});\n  }\n\n  /** Add issue to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewIssue\n   * @function\n   * @param {object} issue - Properly Formatted Issue object\n   */\n  addNewIssue(issue) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issue',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: issue,\n    }));\n  }\n\n  /** Add a user as a watcher on an issue\n   * @name addWatcher\n   * @function\n   * @param {string} issueKey - the key of the existing issue\n   * @param {string} username - the jira username to add as a watcher to the issue\n   */\n  addWatcher(issueKey, username) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueKey}/watchers`,\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: JSON.stringify(username),\n    }));\n  }\n\n  /** Delete issue from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   */\n  deleteIssue(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Update issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290878)\n   * @name updateIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueUpdate - update Object as specified by the rest api\n   */\n  updateIssue(issueId, issueUpdate) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      body: issueUpdate,\n      method: 'PUT',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List Components\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listComponents\n   * @function\n   * @param {string} project - key for the project\n   */\n  listComponents(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/components`,\n    })));\n  }\n\n  /** Add component to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewComponent\n   * @function\n   * @param {object} component - Properly Formatted Component\n   */\n  addNewComponent(component) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/component',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: component,\n    }));\n  }\n\n  /** Delete component from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteComponent\n   * @function\n   * @param {string} componentId - the Id of the component to delete\n   */\n  deleteComponent(componentId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/component/${componentId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all fields custom and not that jira knows about.\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listFields\n   * @function\n   */\n  listFields() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/field',\n    })));\n  }\n\n  /** List all priorities jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listPriorities\n   * @function\n   */\n  listPriorities() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/priority',\n    })));\n  }\n\n  /** List Transitions for a specific issue that are available to the current user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listTransitions\n   * @function\n   * @param {string} issueId - get transitions available for the issue\n   */\n  listTransitions(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n      query: {\n        expand: 'transitions.fields',\n      },\n    })));\n  }\n\n  /** Transition issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name transitionsIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueTransition - transition object from the jira rest API\n   */\n  transitionIssue(issueId, issueTransition) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n    }), {\n      body: issueTransition,\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all Viewable Projects\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289193)\n   * @name listProjects\n   * @function\n   */\n  listProjects() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project',\n    })));\n  }\n\n  /** Add a comment to an issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)\n   * @name addComment\n   * @function\n   * @param {string} issueId - Issue to add a comment to\n   * @param {string} comment - string containing comment\n   */\n  addComment(issueId, comment) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/comment`,\n    }), {\n      body: {\n        body: comment,\n      },\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Add a worklog to a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id291617)\n   * @name addWorklog\n   * @function\n   * @param {string} issueId - Issue to add a worklog to\n   * @param {object} worklog - worklog object from the rest API\n   * @param {object} newEstimate - the new value for the remaining estimate field\n   */\n  addWorklog(issueId, worklog, newEstimate) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/worklog`,\n      query: (newEstimate) ? { adjustEstimate: 'new', newEstimate } : null,\n    }), {\n      body: worklog,\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Delete worklog from issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e1673)\n   * @name deleteWorklog\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {string} worklogId - the Id of the worklog in issue to delete\n   */\n  deleteWorklog(issueId, worklogId) {\n    return this.doRequest(this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/issue/${issueId}/worklog/${worklogId}`,\n      }), {\n        method: 'DELETE',\n        followAllRedirects: true,\n      }\n    ));\n  }\n\n  /** List all Issue Types jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id295946)\n   * @name listIssueTypes\n   * @function\n   */\n  listIssueTypes() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issuetype',\n    })));\n  }\n\n  /** Register a webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name registerWebhook\n   * @function\n   * @param {object} webhook - properly formatted webhook\n   */\n  registerWebhook(webhook) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    }), {\n      method: 'POST',\n      body: webhook,\n    }));\n  }\n\n  /** List all registered webhooks\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name listWebhooks\n   * @function\n   */\n  listWebhooks() {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    })));\n  }\n\n  /** Get a webhook by its ID\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name getWebhook\n   * @function\n   * @param {string} webhookID - id of webhook to get\n   */\n  getWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    })));\n  }\n\n  /** Delete a registered webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name issueLink\n   * @function\n   * @param {string} webhookID - id of the webhook to delete\n   */\n  deleteWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    }), {\n      method: 'DELETE',\n    }));\n  }\n\n  /** Describe the currently authenticated user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id2e865)\n   * @name getCurrentUser\n   * @function\n   */\n  getCurrentUser() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/myself',\n    })));\n  }\n\n  /** Retrieve the backlog of a certain Rapid View\n   * @name getBacklogForRapidView\n   * @function\n   * @param {string} rapidViewId - rapid view id\n   */\n  getBacklogForRapidView(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/xboard/plan/backlog/data',\n      query: {\n        rapidViewId,\n      },\n    })));\n  }\n\n  /** Add attachment to a Issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)\n   * @name addAttachmentOnIssue\n   * @function\n   * @param {string} issueId - issue id\n   * @param {object} readStream - readStream object from fs\n   */\n  addAttachmentOnIssue(issueId, readStream) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/attachments`,\n    }), {\n      method: 'POST',\n      headers: {\n        'X-Atlassian-Token': 'nocheck',\n      },\n      formData: {\n        file: readStream,\n      },\n    }));\n  }\n\n  /** Get list of possible statuses\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)\n   * @name listStatus\n   * @function\n   */\n  listStatus() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/status',\n    })));\n  }\n}\n"
+    "content": "import request from 'request-promise';\nimport url from 'url';\n\n/**\n * @name JiraApi\n * @class\n * Wrapper for the JIRA Rest Api\n * https://docs.atlassian.com/jira/REST/6.4.8/\n */\nexport default class JiraApi {\n  /**\n   * @constructor\n   * @function\n   * @param {JiraApiOptions} options\n   */\n  constructor(options) {\n    this.protocol = options.protocol || 'http';\n    this.host = options.host;\n    this.port = options.port || null;\n    this.apiVersion = options.apiVersion || '2';\n    this.base = options.base || '';\n    this.strictSSL = options.hasOwnProperty('strictSSL') ? options.strictSSL : true;\n      // This is so we can fake during unit tests\n    this.request = options.request || request;\n    this.webhookVersion = options.webHookVersion || '1.0';\n    this.greenhopperVersion = options.greenhopperVersion || '1.0';\n    this.baseOptions = {};\n\n    if (options.oauth && options.oauth.consumer_key && options.oauth.access_token) {\n      this.baseOptions.oauth = {\n        consumer_key: options.oauth.consumer_key,\n        consumer_secret: options.oauth.consumer_secret,\n        token: options.oauth.access_token,\n        token_secret: options.oauth.access_token_secret,\n        signature_method: options.oauth.signature_method || 'RSA-SHA1',\n      };\n    } else if (options.username && options.password) {\n      this.baseOptions.auth = {\n        user: options.username,\n        pass: options.password,\n      };\n    }\n\n    if (options.timeout) {\n      this.baseOptions.timeout = options.timeout;\n    }\n  }\n\n  /**\n   * @typedef JiraApiOptions\n   * @type {object}\n   * @property {string} [protocol=http] - What protocol to use to connect to\n   * jira? Ex: http|https\n   * @property {string} host - What host is this tool connecting to for the jira\n   * instance? Ex: jira.somehost.com\n   * @property {string} [port] - What port is this tool connecting to jira with? Only needed for\n   * none standard ports. Ex: 8080, 3000, etc\n   * @property {string} [username] - Specify a username for this tool to authenticate all\n   * requests with.\n   * @property {string} [password] - Specify a password for this tool to authenticate all\n   * requests with.\n   * @property {string} [apiVersion=2] - What version of the jira rest api is the instance the\n   * tool is connecting to?\n   * @property {string} [base] - What other url parts exist, if any, before the rest/api/\n   * section?\n   * @property {boolean} [strictSSL=true] - Does this tool require each request to be\n   * authenticated?  Defaults to true.\n   * @property {function} [request] - What method does this tool use to make its requests?\n   * Defaults to request from request-promise\n   * @property {number} [timeout] - Integer containing the number of milliseconds to wait for a\n   * server to send response headers (and start the response body) before aborting the request. Note\n   * that if the underlying TCP connection cannot be established, the OS-wide TCP connection timeout\n   * will overrule the timeout option ([the default in Linux can be anywhere from 20-120 *\n   * seconds](http://www.sekuda.com/overriding_the_default_linux_kernel_20_second_tcp_socket_connect_timeout)).\n   * @property {string} [webhookVersion=1.0] - What webhook version does this api wrapper need to\n   * hit?\n   * @property {string} [greenhopperVersion=1.0] - What webhook version does this api wrapper need\n   * to hit?\n   * @property {OAuth} - Specify an oauth object for this tool to authenticate all requests using\n   * OAuth.\n   */\n\n  /**\n   * @typedef OAuth\n   * @type {object}\n   * @property {string} consumer_key - The consumer entered in Jira Preferences.\n   * @property {string} consumer_secret - The private RSA file.\n   * @property {string} access_token - The generated access token.\n   * @property {string} access_token_secret - The generated access toke secret.\n   * @property {string} signature_method [signature_method=RSA-SHA1] - OAuth signurate methode\n   * Possible values RSA-SHA1, HMAC-SHA1, PLAINTEXT. Jira Cloud supports only RSA-SHA1.\n   */\n\n  /**\n   * @name makeRequestHeader\n   * @function\n   * Creates a requestOptions object based on the default template for one\n   * @param {string} uri\n   * @param {object} [options] - an object containing fields and formatting how the\n   */\n  makeRequestHeader(uri, options = {}) {\n    return {\n      rejectUnauthorized: this.strictSSL,\n      method: options.method || 'GET',\n      uri,\n      json: true,\n      ...options,\n    };\n  }\n\n  /**\n   * @typedef makeRequestHeaderOptions\n   * @type {object}\n   * @property {string} [method] - HTTP Request Method. ie GET, POST, PUT, DELETE\n   */\n\n  /**\n   * @name makeUri\n   * @function\n   * Creates a URI object for a given pathname\n   * @param {string} pathname - The url after the /rest/api/version\n   */\n  makeUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/api/${this.apiVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeWebhookUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeWebhookUri({ pathname }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/webhooks/${this.webhookVersion}${pathname}`,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeSprintQueryUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeSprintQueryUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/greenhopper/${this.greenhopperVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name doRequest\n   * @function\n   * Does a request based on the requestOptions object\n   * @param {object} requestOptions - fields on this object get posted as a request header for\n   * requests to jira\n   */\n  async doRequest(requestOptions) {\n    const options = {\n      ...this.baseOptions,\n      ...requestOptions,\n    };\n\n    const response = await this.request(options);\n\n    if (response) {\n      if (Array.isArray(response.errorMessages) && response.errorMessages.length > 0) {\n        throw new Error(response.errorMessages.join(', '));\n      }\n    }\n\n    return response;\n  }\n\n  /**\n   * @name findIssue\n   * @function\n   * Find an issue in jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290709)\n   * @param {string} issueNumber - The issue number to search for including the project key\n   * @param {string} expand - The resource expansion to return additional fields in the response\n   */\n  findIssue(issueNumber, expand) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}`,\n      query: {\n        expand: expand || '',\n      },\n    })));\n  }\n\n  /**\n   * @name getUnresolvedIssueCount\n   * @function\n   * Get the unresolved issue count\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288524)\n   * @param {string} version - the version of your product you want to find the unresolved\n   * issues of.\n   */\n  async getUnresolvedIssueCount(version) {\n    const requestHeaders = this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/version/${version}/unresolvedIssueCount`,\n      })\n    );\n    const response = await this.doRequest(requestHeaders);\n    return response.issuesUnresolvedCount;\n  }\n\n  /**\n   * @name getProject\n   * @function\n   * Get the Project by project key\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289232)\n   * @param {string} project - key for the project\n   */\n  getProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}`,\n    })));\n  }\n\n/**\n   * @name createProject\n   * @function\n   * Create a new Project\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/project-createProject)\n   * @param {object} project - with specs\n   */\n  createProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project/',\n    }), {\n      method: 'POST',\n      body: project,\n    }));\n  }\n\n  /** Find the Rapid View for a specified project\n   * @name findRapidView\n   * @function\n   * @param {string} projectName - name for the project\n   */\n  async findRapidView(projectName) {\n    const response = await this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapidviews/list',\n    })));\n\n    if (typeof projectName === 'undefined' || projectName === null) return response.views;\n\n    const rapidViewResult = response.views\n      .find(x => x.name.toLowerCase() === projectName.toLowerCase());\n\n    return rapidViewResult;\n  }\n\n  /** Get the most recent sprint for a given rapidViewId\n   * @name getLastSprintForRapidView\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  async getLastSprintForRapidView(rapidViewId) {\n    const response = await this.doRequest(\n      this.makeRequestHeader(this.makeSprintQueryUri({\n        pathname: `/sprintquery/${rapidViewId}`,\n      }))\n    );\n    return response.sprints.pop();\n  }\n\n  /** Get the issues for a rapidView / sprint\n   * @name getSprintIssues\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   * @param {string} sprintId - the id for the sprint\n   */\n  getSprintIssues(rapidViewId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapid/charts/sprintreport',\n      query: {\n        rapidViewId,\n        sprintId,\n      },\n    })));\n  }\n\n  /** Get a list of Sprints belonging to a Rapid View\n   * @name listSprints\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  listSprints(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: `/sprintquery/${rapidViewId}`,\n    })));\n  }\n\n  /** Add an issue to the project's current sprint\n   * @name addIssueToSprint\n   * @function\n   * @param {string} issueId - the id of the existing issue\n   * @param {string} sprintId - the id of the sprint to add it to\n   */\n  addIssueToSprint(issueId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/sprint/${sprintId}/issues/add`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: {\n        issueKeys: [issueId],\n      },\n    }));\n  }\n\n  /** Create an issue link between two issues\n   * @name issueLink\n   * @function\n   * @param {object} link - a link object formatted how the Jira API specifies\n   */\n  issueLink(link) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issueLink',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: link,\n    }));\n  }\n\n  /** Retrieves the remote links associated with the given issue.\n   * @name getRemoteLinks\n   * @function\n   * @param {string} issueNumber - the issue number to find remote links for.\n   */\n  getRemoteLinks(issueNumber) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    })));\n  }\n\n  /**\n   * @name createRemoteLink\n   * @function\n   * Creates a remote link associated with the given issue.\n   * @param {string} issueNumber - The issue number to create the remotelink under\n   * @param {object} remoteLink - the remotelink object as specified by the Jira API\n   */\n  createRemoteLink(issueNumber, remoteLink) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    }), {\n      method: 'POST',\n      body: remoteLink,\n    }));\n  }\n\n  /** Get Versions for a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)\n   * @name getVersions\n   * @function\n   * @param {string} project - A project key to get versions for\n   */\n  getVersions(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/versions`,\n    })));\n  }\n\n  /** Create a version\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)\n   * @name createVersion\n   * @function\n   * @param {string} version - an object of the new version\n   */\n  createVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/version',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Update a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)\n   * @name updateVersion\n   * @function\n   * @param {string} version - an new object of the version to update\n   */\n  updateVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${version.id}`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Delete a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/version-delete)\n   * @name deleteVersion\n   * @function\n   * @param {string} versionId - the ID of the version to delete\n   * @param {string} moveFixIssuesToId - when provided, existing fixVersions will be moved\n   *                 to this ID. Otherwise, the deleted version will be removed from all\n   *                 issue fixVersions.\n   * @param {string} moveAffectedIssuesToId - when provided, existing affectedVersions will\n   *                 be moved to this ID. Otherwise, the deleted version will be removed\n   *                 from all issue affectedVersions.\n   */\n  deleteVersion(versionId, moveFixIssuesToId, moveAffectedIssuesToId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${versionId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n      qs: {\n        moveFixIssuesTo: moveFixIssuesToId,\n        moveAffectedIssuesTo: moveAffectedIssuesToId,\n      },\n    }));\n  }\n\n  /** Pass a search query to Jira\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e4424)\n   * @name searchJira\n   * @function\n   * @param {string} searchString - jira query string in JQL\n   * @param {object} optional - object containing any of the following properties\n   * @param {integer} [optional.startAt=0]: optional starting index number\n   * @param {integer} [optional.maxResults=50]: optional ending index number\n   * @param {array} [optional.fields]: optional array of string names of desired fields\n   */\n  searchJira(searchString, optional = {}) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/search',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: {\n        jql: searchString,\n        ...optional,\n      },\n    }));\n  }\n\n  /** Search user on Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)\n   * @name searchUsers\n   * @function\n   * @param {SearchUserOptions} options\n   */\n  searchUsers({ username, startAt, maxResults, includeActive, includeInactive }) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/user/search',\n      query: {\n        username,\n        startAt: startAt || 0,\n        maxResults: maxResults || 50,\n        includeActive: includeActive || true,\n        includeInactive: includeInactive || false,\n      },\n    }), {\n      followAllRedirects: true,\n    }));\n  }\n\n  /**\n   * @typedef SearchUserOptions\n   * @type {object}\n   * @property {string} username - A query string used to search username, name or e-mail address\n   * @property {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @property {integer} [maxResults=50] - The maximum number of users to return\n   * @property {boolean} [includeActive=true] - If true, then active users are included\n   * in the results\n   * @property {boolean} [includeInactive=false] - If true, then inactive users\n   * are included in the results\n   */\n\n  /** Get all users in group on Jira\n   * @name getUsersInGroup\n   * @function\n   * @param {string} groupname - A query string used to search users in group\n   * @param {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @param {integer} [maxResults=50] - The maximum number of users to return (defaults to 50).\n   */\n  getUsersInGroup(groupname, startAt = 0, maxResults = 50) {\n    return this.doRequest(\n      this.makeRequestHeader(this.makeUri({\n        pathname: '/group',\n        query: {\n          groupname,\n          expand: `users[${startAt}:${maxResults}]`,\n        },\n      }), {\n        followAllRedirects: true,\n      })\n    );\n  }\n\n  /** Get issues related to a user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)\n   * @name getUsersIssues\n   * @function\n   * @param {string} username - username of user to search for\n   * @param {boolean} open - determines if only open issues should be returned\n   */\n  getUsersIssues(username, open) {\n    return this.searchJira(\n      `assignee = ${username.replace('@', '\\\\u0040')} ` +\n      `AND status in (Open, 'In Progress', Reopened) \"${open}\"`, {});\n  }\n\n  /** Add issue to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewIssue\n   * @function\n   * @param {object} issue - Properly Formatted Issue object\n   */\n  addNewIssue(issue) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issue',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: issue,\n    }));\n  }\n\n  /** Add a user as a watcher on an issue\n   * @name addWatcher\n   * @function\n   * @param {string} issueKey - the key of the existing issue\n   * @param {string} username - the jira username to add as a watcher to the issue\n   */\n  addWatcher(issueKey, username) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueKey}/watchers`,\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: JSON.stringify(username),\n    }));\n  }\n\n  /** Delete issue from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   */\n  deleteIssue(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Update issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290878)\n   * @name updateIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueUpdate - update Object as specified by the rest api\n   */\n  updateIssue(issueId, issueUpdate) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      body: issueUpdate,\n      method: 'PUT',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List Components\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listComponents\n   * @function\n   * @param {string} project - key for the project\n   */\n  listComponents(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/components`,\n    })));\n  }\n\n  /** Add component to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewComponent\n   * @function\n   * @param {object} component - Properly Formatted Component\n   */\n  addNewComponent(component) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/component',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: component,\n    }));\n  }\n\n  /** Delete component from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteComponent\n   * @function\n   * @param {string} componentId - the Id of the component to delete\n   */\n  deleteComponent(componentId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/component/${componentId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all fields custom and not that jira knows about.\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listFields\n   * @function\n   */\n  listFields() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/field',\n    })));\n  }\n\n  /** List all priorities jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listPriorities\n   * @function\n   */\n  listPriorities() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/priority',\n    })));\n  }\n\n  /** List Transitions for a specific issue that are available to the current user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listTransitions\n   * @function\n   * @param {string} issueId - get transitions available for the issue\n   */\n  listTransitions(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n      query: {\n        expand: 'transitions.fields',\n      },\n    })));\n  }\n\n  /** Transition issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name transitionsIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueTransition - transition object from the jira rest API\n   */\n  transitionIssue(issueId, issueTransition) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n    }), {\n      body: issueTransition,\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all Viewable Projects\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289193)\n   * @name listProjects\n   * @function\n   */\n  listProjects() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project',\n    })));\n  }\n\n  /** Add a comment to an issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)\n   * @name addComment\n   * @function\n   * @param {string} issueId - Issue to add a comment to\n   * @param {string} comment - string containing comment\n   */\n  addComment(issueId, comment) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/comment`,\n    }), {\n      body: {\n        body: comment,\n      },\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Add a worklog to a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id291617)\n   * @name addWorklog\n   * @function\n   * @param {string} issueId - Issue to add a worklog to\n   * @param {object} worklog - worklog object from the rest API\n   * @param {object} newEstimate - the new value for the remaining estimate field\n   */\n  addWorklog(issueId, worklog, newEstimate) {\n    const header = {\n      uri: this.makeUri({\n        pathname: `/issue/${issueId}/worklog`,\n        query: { adjustEstimate: 'new', newEstimate },\n      }),\n      body: worklog,\n      method: 'POST',\n      'Content-Type': 'application/json',\n      json: true,\n    };\n\n    return this.doRequest(header);\n  }\n\n  /** Delete worklog from issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e1673)\n   * @name deleteWorklog\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {string} worklogId - the Id of the worklog in issue to delete\n   */\n  deleteWorklog(issueId, worklogId) {\n    return this.doRequest(this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/issue/${issueId}/worklog/${worklogId}`,\n      }), {\n        method: 'DELETE',\n        followAllRedirects: true,\n      }\n    ));\n  }\n\n  /** List all Issue Types jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id295946)\n   * @name listIssueTypes\n   * @function\n   */\n  listIssueTypes() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issuetype',\n    })));\n  }\n\n  /** Register a webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name registerWebhook\n   * @function\n   * @param {object} webhook - properly formatted webhook\n   */\n  registerWebhook(webhook) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    }), {\n      method: 'POST',\n      body: webhook,\n    }));\n  }\n\n  /** List all registered webhooks\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name listWebhooks\n   * @function\n   */\n  listWebhooks() {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    })));\n  }\n\n  /** Get a webhook by its ID\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name getWebhook\n   * @function\n   * @param {string} webhookID - id of webhook to get\n   */\n  getWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    })));\n  }\n\n  /** Delete a registered webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name issueLink\n   * @function\n   * @param {string} webhookID - id of the webhook to delete\n   */\n  deleteWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    }), {\n      method: 'DELETE',\n    }));\n  }\n\n  /** Describe the currently authenticated user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id2e865)\n   * @name getCurrentUser\n   * @function\n   */\n  getCurrentUser() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/myself',\n    })));\n  }\n\n  /** Retrieve the backlog of a certain Rapid View\n   * @name getBacklogForRapidView\n   * @function\n   * @param {string} rapidViewId - rapid view id\n   */\n  getBacklogForRapidView(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/xboard/plan/backlog/data',\n      query: {\n        rapidViewId,\n      },\n    })));\n  }\n\n  /** Add attachment to a Issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)\n   * @name addAttachmentOnIssue\n   * @function\n   * @param {string} issueId - issue id\n   * @param {object} readStream - readStream object from fs\n   */\n  addAttachmentOnIssue(issueId, readStream) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/attachments`,\n    }), {\n      method: 'POST',\n      headers: {\n        'X-Atlassian-Token': 'nocheck',\n      },\n      formData: {\n        file: readStream,\n      },\n    }));\n  }\n\n  /** Get list of possible statuses\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)\n   * @name listStatus\n   * @function\n   */\n  listStatus() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/status',\n    })));\n  }\n}\n"
   },
   {
     "__docId__": 1,
@@ -733,7 +733,7 @@
     "longname": "src/jira.js~JiraApi#findIssue",
     "access": null,
     "description": "",
-    "lineNumber": 198,
+    "lineNumber": 199,
     "unknown": [
       {
         "tagName": "@name",
@@ -783,7 +783,7 @@
     "longname": "src/jira.js~JiraApi#getUnresolvedIssueCount",
     "access": null,
     "description": "",
-    "lineNumber": 215,
+    "lineNumber": 216,
     "unknown": [
       {
         "tagName": "@name",
@@ -823,7 +823,7 @@
     "longname": "src/jira.js~JiraApi#getProject",
     "access": null,
     "description": "",
-    "lineNumber": 232,
+    "lineNumber": 233,
     "unknown": [
       {
         "tagName": "@name",
@@ -863,7 +863,7 @@
     "longname": "src/jira.js~JiraApi#createProject",
     "access": null,
     "description": "",
-    "lineNumber": 245,
+    "lineNumber": 246,
     "unknown": [
       {
         "tagName": "@name",
@@ -903,7 +903,7 @@
     "longname": "src/jira.js~JiraApi#findRapidView",
     "access": null,
     "description": "Find the Rapid View for a specified project",
-    "lineNumber": 259,
+    "lineNumber": 260,
     "unknown": [
       {
         "tagName": "@name",
@@ -943,7 +943,7 @@
     "longname": "src/jira.js~JiraApi#getLastSprintForRapidView",
     "access": null,
     "description": "Get the most recent sprint for a given rapidViewId",
-    "lineNumber": 277,
+    "lineNumber": 278,
     "unknown": [
       {
         "tagName": "@name",
@@ -983,7 +983,7 @@
     "longname": "src/jira.js~JiraApi#getSprintIssues",
     "access": null,
     "description": "Get the issues for a rapidView / sprint",
-    "lineNumber": 292,
+    "lineNumber": 293,
     "unknown": [
       {
         "tagName": "@name",
@@ -1033,7 +1033,7 @@
     "longname": "src/jira.js~JiraApi#listSprints",
     "access": null,
     "description": "Get a list of Sprints belonging to a Rapid View",
-    "lineNumber": 307,
+    "lineNumber": 308,
     "unknown": [
       {
         "tagName": "@name",
@@ -1073,7 +1073,7 @@
     "longname": "src/jira.js~JiraApi#addIssueToSprint",
     "access": null,
     "description": "Add an issue to the project's current sprint",
-    "lineNumber": 319,
+    "lineNumber": 320,
     "unknown": [
       {
         "tagName": "@name",
@@ -1123,7 +1123,7 @@
     "longname": "src/jira.js~JiraApi#issueLink",
     "access": null,
     "description": "Create an issue link between two issues",
-    "lineNumber": 336,
+    "lineNumber": 337,
     "unknown": [
       {
         "tagName": "@name",
@@ -1163,7 +1163,7 @@
     "longname": "src/jira.js~JiraApi#getRemoteLinks",
     "access": null,
     "description": "Retrieves the remote links associated with the given issue.",
-    "lineNumber": 351,
+    "lineNumber": 352,
     "unknown": [
       {
         "tagName": "@name",
@@ -1203,7 +1203,7 @@
     "longname": "src/jira.js~JiraApi#createRemoteLink",
     "access": null,
     "description": "",
-    "lineNumber": 364,
+    "lineNumber": 365,
     "unknown": [
       {
         "tagName": "@name",
@@ -1253,7 +1253,7 @@
     "longname": "src/jira.js~JiraApi#getVersions",
     "access": null,
     "description": "Get Versions for a project\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)",
-    "lineNumber": 379,
+    "lineNumber": 380,
     "unknown": [
       {
         "tagName": "@name",
@@ -1293,7 +1293,7 @@
     "longname": "src/jira.js~JiraApi#createVersion",
     "access": null,
     "description": "Create a version\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)",
-    "lineNumber": 391,
+    "lineNumber": 392,
     "unknown": [
       {
         "tagName": "@name",
@@ -1333,7 +1333,7 @@
     "longname": "src/jira.js~JiraApi#updateVersion",
     "access": null,
     "description": "Update a version\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)",
-    "lineNumber": 407,
+    "lineNumber": 408,
     "unknown": [
       {
         "tagName": "@name",
@@ -1373,7 +1373,7 @@
     "longname": "src/jira.js~JiraApi#deleteVersion",
     "access": null,
     "description": "Delete a version\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/version-delete)",
-    "lineNumber": 429,
+    "lineNumber": 430,
     "unknown": [
       {
         "tagName": "@name",
@@ -1433,7 +1433,7 @@
     "longname": "src/jira.js~JiraApi#searchJira",
     "access": null,
     "description": "Pass a search query to Jira\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e4424)",
-    "lineNumber": 452,
+    "lineNumber": 453,
     "unknown": [
       {
         "tagName": "@name",
@@ -1517,7 +1517,7 @@
     "longname": "src/jira.js~JiraApi#searchUsers",
     "access": null,
     "description": "Search user on Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)",
-    "lineNumber": 471,
+    "lineNumber": 472,
     "unknown": [
       {
         "tagName": "@name",
@@ -1635,7 +1635,7 @@
     "longname": "src/jira.js~JiraApi#getUsersInGroup",
     "access": null,
     "description": "Get all users in group on Jira",
-    "lineNumber": 505,
+    "lineNumber": 506,
     "unknown": [
       {
         "tagName": "@name",
@@ -1699,7 +1699,7 @@
     "longname": "src/jira.js~JiraApi#getUsersIssues",
     "access": null,
     "description": "Get issues related to a user\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)",
-    "lineNumber": 526,
+    "lineNumber": 527,
     "unknown": [
       {
         "tagName": "@name",
@@ -1749,7 +1749,7 @@
     "longname": "src/jira.js~JiraApi#addNewIssue",
     "access": null,
     "description": "Add issue to Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)",
-    "lineNumber": 538,
+    "lineNumber": 539,
     "unknown": [
       {
         "tagName": "@name",
@@ -1789,7 +1789,7 @@
     "longname": "src/jira.js~JiraApi#addWatcher",
     "access": null,
     "description": "Add a user as a watcher on an issue",
-    "lineNumber": 554,
+    "lineNumber": 555,
     "unknown": [
       {
         "tagName": "@name",
@@ -1839,7 +1839,7 @@
     "longname": "src/jira.js~JiraApi#deleteIssue",
     "access": null,
     "description": "Delete issue from Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)",
-    "lineNumber": 570,
+    "lineNumber": 571,
     "unknown": [
       {
         "tagName": "@name",
@@ -1879,7 +1879,7 @@
     "longname": "src/jira.js~JiraApi#updateIssue",
     "access": null,
     "description": "Update issue in Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290878)",
-    "lineNumber": 586,
+    "lineNumber": 587,
     "unknown": [
       {
         "tagName": "@name",
@@ -1929,7 +1929,7 @@
     "longname": "src/jira.js~JiraApi#listComponents",
     "access": null,
     "description": "List Components\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
-    "lineNumber": 602,
+    "lineNumber": 603,
     "unknown": [
       {
         "tagName": "@name",
@@ -1969,7 +1969,7 @@
     "longname": "src/jira.js~JiraApi#addNewComponent",
     "access": null,
     "description": "Add component to Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)",
-    "lineNumber": 614,
+    "lineNumber": 615,
     "unknown": [
       {
         "tagName": "@name",
@@ -2009,7 +2009,7 @@
     "longname": "src/jira.js~JiraApi#deleteComponent",
     "access": null,
     "description": "Delete component from Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)",
-    "lineNumber": 630,
+    "lineNumber": 631,
     "unknown": [
       {
         "tagName": "@name",
@@ -2049,7 +2049,7 @@
     "longname": "src/jira.js~JiraApi#listFields",
     "access": null,
     "description": "List all fields custom and not that jira knows about.\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
-    "lineNumber": 644,
+    "lineNumber": 645,
     "unknown": [
       {
         "tagName": "@name",
@@ -2078,7 +2078,7 @@
     "longname": "src/jira.js~JiraApi#listPriorities",
     "access": null,
     "description": "List all priorities jira knows about\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
-    "lineNumber": 655,
+    "lineNumber": 656,
     "unknown": [
       {
         "tagName": "@name",
@@ -2107,7 +2107,7 @@
     "longname": "src/jira.js~JiraApi#listTransitions",
     "access": null,
     "description": "List Transitions for a specific issue that are available to the current user\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
-    "lineNumber": 667,
+    "lineNumber": 668,
     "unknown": [
       {
         "tagName": "@name",
@@ -2147,7 +2147,7 @@
     "longname": "src/jira.js~JiraApi#transitionIssue",
     "access": null,
     "description": "Transition issue in Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
-    "lineNumber": 683,
+    "lineNumber": 684,
     "unknown": [
       {
         "tagName": "@name",
@@ -2197,7 +2197,7 @@
     "longname": "src/jira.js~JiraApi#listProjects",
     "access": null,
     "description": "List all Viewable Projects\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289193)",
-    "lineNumber": 698,
+    "lineNumber": 699,
     "unknown": [
       {
         "tagName": "@name",
@@ -2226,7 +2226,7 @@
     "longname": "src/jira.js~JiraApi#addComment",
     "access": null,
     "description": "Add a comment to an issue\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)",
-    "lineNumber": 711,
+    "lineNumber": 712,
     "unknown": [
       {
         "tagName": "@name",
@@ -2276,7 +2276,7 @@
     "longname": "src/jira.js~JiraApi#addWorklog",
     "access": null,
     "description": "Add a worklog to a project\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id291617)",
-    "lineNumber": 731,
+    "lineNumber": 732,
     "unknown": [
       {
         "tagName": "@name",
@@ -2336,7 +2336,7 @@
     "longname": "src/jira.js~JiraApi#deleteWorklog",
     "access": null,
     "description": "Delete worklog from issue\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e1673)",
-    "lineNumber": 749,
+    "lineNumber": 754,
     "unknown": [
       {
         "tagName": "@name",
@@ -2386,7 +2386,7 @@
     "longname": "src/jira.js~JiraApi#listIssueTypes",
     "access": null,
     "description": "List all Issue Types jira knows about\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id295946)",
-    "lineNumber": 765,
+    "lineNumber": 770,
     "unknown": [
       {
         "tagName": "@name",
@@ -2415,7 +2415,7 @@
     "longname": "src/jira.js~JiraApi#registerWebhook",
     "access": null,
     "description": "Register a webhook\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
-    "lineNumber": 777,
+    "lineNumber": 782,
     "unknown": [
       {
         "tagName": "@name",
@@ -2455,7 +2455,7 @@
     "longname": "src/jira.js~JiraApi#listWebhooks",
     "access": null,
     "description": "List all registered webhooks\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
-    "lineNumber": 791,
+    "lineNumber": 796,
     "unknown": [
       {
         "tagName": "@name",
@@ -2484,7 +2484,7 @@
     "longname": "src/jira.js~JiraApi#getWebhook",
     "access": null,
     "description": "Get a webhook by its ID\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
-    "lineNumber": 803,
+    "lineNumber": 808,
     "unknown": [
       {
         "tagName": "@name",
@@ -2524,7 +2524,7 @@
     "longname": "src/jira.js~JiraApi#deleteWebhook",
     "access": null,
     "description": "Delete a registered webhook\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
-    "lineNumber": 815,
+    "lineNumber": 820,
     "unknown": [
       {
         "tagName": "@name",
@@ -2564,7 +2564,7 @@
     "longname": "src/jira.js~JiraApi#getCurrentUser",
     "access": null,
     "description": "Describe the currently authenticated user\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id2e865)",
-    "lineNumber": 828,
+    "lineNumber": 833,
     "unknown": [
       {
         "tagName": "@name",
@@ -2593,7 +2593,7 @@
     "longname": "src/jira.js~JiraApi#getBacklogForRapidView",
     "access": null,
     "description": "Retrieve the backlog of a certain Rapid View",
-    "lineNumber": 839,
+    "lineNumber": 844,
     "unknown": [
       {
         "tagName": "@name",
@@ -2633,7 +2633,7 @@
     "longname": "src/jira.js~JiraApi#addAttachmentOnIssue",
     "access": null,
     "description": "Add attachment to a Issue\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)",
-    "lineNumber": 855,
+    "lineNumber": 860,
     "unknown": [
       {
         "tagName": "@name",
@@ -2683,7 +2683,7 @@
     "longname": "src/jira.js~JiraApi#listStatus",
     "access": null,
     "description": "Get list of possible statuses\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)",
-    "lineNumber": 874,
+    "lineNumber": 879,
     "unknown": [
       {
         "tagName": "@name",
