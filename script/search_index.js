@@ -420,6 +420,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#createuser",
+    "class/src/jira.js~JiraApi.html#instance-method-createUser",
+    "src/jira.js~JiraApi#createUser",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#createversion",
     "class/src/jira.js~JiraApi.html#instance-method-createVersion",
     "src/jira.js~JiraApi#createVersion",
