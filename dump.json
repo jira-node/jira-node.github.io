@@ -2,23 +2,20 @@
   {
     "__docId__": 0,
     "kind": "file",
-    "static": true,
-    "variation": null,
     "name": "src/jira.js",
-    "memberof": null,
+    "content": "import request from 'request-promise';\nimport url from 'url';\n\n/**\n * @name JiraApi\n * @class\n * Wrapper for the JIRA Rest Api\n * https://docs.atlassian.com/jira/REST/6.4.8/\n */\nexport default class JiraApi {\n  /**\n   * @constructor\n   * @function\n   * @param {JiraApiOptions} options\n   */\n  constructor(options) {\n    this.protocol = options.protocol || 'http';\n    this.host = options.host;\n    this.port = options.port || null;\n    this.apiVersion = options.apiVersion || '2';\n    this.base = options.base || '';\n    this.strictSSL = options.hasOwnProperty('strictSSL') ? options.strictSSL : true;\n      // This is so we can fake during unit tests\n    this.request = options.request || request;\n    this.webhookVersion = options.webHookVersion || '1.0';\n    this.greenhopperVersion = options.greenhopperVersion || '1.0';\n    this.baseOptions = {};\n\n    if (options.oauth && options.oauth.consumer_key && options.oauth.access_token) {\n      this.baseOptions.oauth = {\n        consumer_key: options.oauth.consumer_key,\n        consumer_secret: options.oauth.consumer_secret,\n        token: options.oauth.access_token,\n        token_secret: options.oauth.access_token_secret,\n        signature_method: options.oauth.signature_method || 'RSA-SHA1',\n      };\n    } else if (options.username && options.password) {\n      this.baseOptions.auth = {\n        user: options.username,\n        pass: options.password,\n      };\n    }\n\n    if (options.timeout) {\n      this.baseOptions.timeout = options.timeout;\n    }\n  }\n\n  /**\n   * @typedef JiraApiOptions\n   * @type {object}\n   * @property {string} [protocol=http] - What protocol to use to connect to\n   * jira? Ex: http|https\n   * @property {string} host - What host is this tool connecting to for the jira\n   * instance? Ex: jira.somehost.com\n   * @property {string} [port] - What port is this tool connecting to jira with? Only needed for\n   * none standard ports. Ex: 8080, 3000, etc\n   * @property {string} [username] - Specify a username for this tool to authenticate all\n   * requests with.\n   * @property {string} [password] - Specify a password for this tool to authenticate all\n   * requests with.\n   * @property {string} [apiVersion=2] - What version of the jira rest api is the instance the\n   * tool is connecting to?\n   * @property {string} [base] - What other url parts exist, if any, before the rest/api/\n   * section?\n   * @property {boolean} [strictSSL=true] - Does this tool require each request to be\n   * authenticated?  Defaults to true.\n   * @property {function} [request] - What method does this tool use to make its requests?\n   * Defaults to request from request-promise\n   * @property {number} [timeout] - Integer containing the number of milliseconds to wait for a\n   * server to send response headers (and start the response body) before aborting the request. Note\n   * that if the underlying TCP connection cannot be established, the OS-wide TCP connection timeout\n   * will overrule the timeout option ([the default in Linux can be anywhere from 20-120 *\n   * seconds](http://www.sekuda.com/overriding_the_default_linux_kernel_20_second_tcp_socket_connect_timeout)).\n   * @property {string} [webhookVersion=1.0] - What webhook version does this api wrapper need to\n   * hit?\n   * @property {string} [greenhopperVersion=1.0] - What webhook version does this api wrapper need\n   * to hit?\n   * @property {OAuth} - Specify an oauth object for this tool to authenticate all requests using\n   * OAuth.\n   */\n\n  /**\n   * @typedef OAuth\n   * @type {object}\n   * @property {string} consumer_key - The consumer entered in Jira Preferences.\n   * @property {string} consumer_secret - The private RSA file.\n   * @property {string} access_token - The generated access token.\n   * @property {string} access_token_secret - The generated access toke secret.\n   * @property {string} signature_method [signature_method=RSA-SHA1] - OAuth signurate methode\n   * Possible values RSA-SHA1, HMAC-SHA1, PLAINTEXT. Jira Cloud supports only RSA-SHA1.\n   */\n\n  /**\n   * @name makeRequestHeader\n   * @function\n   * Creates a requestOptions object based on the default template for one\n   * @param {string} uri\n   * @param {object} [options] - an object containing fields and formatting how the\n   */\n  makeRequestHeader(uri, options = {}) {\n    return {\n      rejectUnauthorized: this.strictSSL,\n      method: options.method || 'GET',\n      uri,\n      json: true,\n      ...options,\n    };\n  }\n\n  /**\n   * @typedef makeRequestHeaderOptions\n   * @type {object}\n   * @property {string} [method] - HTTP Request Method. ie GET, POST, PUT, DELETE\n   */\n\n  /**\n   * @name makeUri\n   * @function\n   * Creates a URI object for a given pathname\n   * @param {string} pathname - The url after the /rest/api/version\n   */\n  makeUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/api/${this.apiVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeWebhookUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeWebhookUri({ pathname }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/webhooks/${this.webhookVersion}${pathname}`,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeSprintQueryUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeSprintQueryUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/greenhopper/${this.greenhopperVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name doRequest\n   * @function\n   * Does a request based on the requestOptions object\n   * @param {object} requestOptions - fields on this object get posted as a request header for\n   * requests to jira\n   */\n  async doRequest(requestOptions) {\n    const options = {\n      ...this.baseOptions,\n      ...requestOptions,\n    };\n\n    const response = await this.request(options);\n\n    if (response) {\n      if (Array.isArray(response.errorMessages) && response.errorMessages.length > 0) {\n        throw new Error(response.errorMessages.join(', '));\n      }\n    }\n\n    return response;\n  }\n\n  /**\n   * @name findIssue\n   * @function\n   * Find an issue in jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290709)\n   * @param {string} issueNumber - The issue number to search for including the project key\n   * @param {string} expand - The resource expansion to return additional fields in the response\n   */\n  findIssue(issueNumber, expand) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}`,\n      query: {\n        expand: expand || '',\n      },\n    })));\n  }\n\n  /**\n   * @name getUnresolvedIssueCount\n   * @function\n   * Get the unresolved issue count\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288524)\n   * @param {string} version - the version of your product you want to find the unresolved\n   * issues of.\n   */\n  async getUnresolvedIssueCount(version) {\n    const requestHeaders = this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/version/${version}/unresolvedIssueCount`,\n      }),\n    );\n    const response = await this.doRequest(requestHeaders);\n    return response.issuesUnresolvedCount;\n  }\n\n  /**\n   * @name getProject\n   * @function\n   * Get the Project by project key\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289232)\n   * @param {string} project - key for the project\n   */\n  getProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}`,\n    })));\n  }\n\n/**\n   * @name createProject\n   * @function\n   * Create a new Project\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/project-createProject)\n   * @param {object} project - with specs\n   */\n  createProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project/',\n    }), {\n      method: 'POST',\n      body: project,\n    }));\n  }\n\n  /** Find the Rapid View for a specified project\n   * @name findRapidView\n   * @function\n   * @param {string} projectName - name for the project\n   */\n  async findRapidView(projectName) {\n    const response = await this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapidviews/list',\n    })));\n\n    if (typeof projectName === 'undefined' || projectName === null) return response.views;\n\n    const rapidViewResult = response.views\n      .find(x => x.name.toLowerCase() === projectName.toLowerCase());\n\n    return rapidViewResult;\n  }\n\n  /** Get the most recent sprint for a given rapidViewId\n   * @name getLastSprintForRapidView\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  async getLastSprintForRapidView(rapidViewId) {\n    const response = await this.doRequest(\n      this.makeRequestHeader(this.makeSprintQueryUri({\n        pathname: `/sprintquery/${rapidViewId}`,\n      })),\n    );\n    return response.sprints.pop();\n  }\n\n  /** Get the issues for a rapidView / sprint\n   * @name getSprintIssues\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   * @param {string} sprintId - the id for the sprint\n   */\n  getSprintIssues(rapidViewId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapid/charts/sprintreport',\n      query: {\n        rapidViewId,\n        sprintId,\n      },\n    })));\n  }\n\n  /** Get a list of Sprints belonging to a Rapid View\n   * @name listSprints\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  listSprints(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: `/sprintquery/${rapidViewId}`,\n    })));\n  }\n\n  /** Add an issue to the project's current sprint\n   * @name addIssueToSprint\n   * @function\n   * @param {string} issueId - the id of the existing issue\n   * @param {string} sprintId - the id of the sprint to add it to\n   */\n  addIssueToSprint(issueId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/sprint/${sprintId}/issues/add`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: {\n        issueKeys: [issueId],\n      },\n    }));\n  }\n\n  /** Create an issue link between two issues\n   * @name issueLink\n   * @function\n   * @param {object} link - a link object formatted how the Jira API specifies\n   */\n  issueLink(link) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issueLink',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: link,\n    }));\n  }\n\n  /** Retrieves the remote links associated with the given issue.\n   * @name getRemoteLinks\n   * @function\n   * @param {string} issueNumber - the issue number to find remote links for.\n   */\n  getRemoteLinks(issueNumber) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    })));\n  }\n\n  /**\n   * @name createRemoteLink\n   * @function\n   * Creates a remote link associated with the given issue.\n   * @param {string} issueNumber - The issue number to create the remotelink under\n   * @param {object} remoteLink - the remotelink object as specified by the Jira API\n   */\n  createRemoteLink(issueNumber, remoteLink) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    }), {\n      method: 'POST',\n      body: remoteLink,\n    }));\n  }\n\n  /** Get Versions for a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)\n   * @name getVersions\n   * @function\n   * @param {string} project - A project key to get versions for\n   */\n  getVersions(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/versions`,\n    })));\n  }\n\n  /** Create a version\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)\n   * @name createVersion\n   * @function\n   * @param {string} version - an object of the new version\n   */\n  createVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/version',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Update a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)\n   * @name updateVersion\n   * @function\n   * @param {string} version - an new object of the version to update\n   */\n  updateVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${version.id}`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Delete a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/version-delete)\n   * @name deleteVersion\n   * @function\n   * @param {string} versionId - the ID of the version to delete\n   * @param {string} moveFixIssuesToId - when provided, existing fixVersions will be moved\n   *                 to this ID. Otherwise, the deleted version will be removed from all\n   *                 issue fixVersions.\n   * @param {string} moveAffectedIssuesToId - when provided, existing affectedVersions will\n   *                 be moved to this ID. Otherwise, the deleted version will be removed\n   *                 from all issue affectedVersions.\n   */\n  deleteVersion(versionId, moveFixIssuesToId, moveAffectedIssuesToId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${versionId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n      qs: {\n        moveFixIssuesTo: moveFixIssuesToId,\n        moveAffectedIssuesTo: moveAffectedIssuesToId,\n      },\n    }));\n  }\n\n  /** Pass a search query to Jira\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e4424)\n   * @name searchJira\n   * @function\n   * @param {string} searchString - jira query string in JQL\n   * @param {object} optional - object containing any of the following properties\n   * @param {integer} [optional.startAt=0]: optional starting index number\n   * @param {integer} [optional.maxResults=50]: optional ending index number\n   * @param {array} [optional.fields]: optional array of string names of desired fields\n   */\n  searchJira(searchString, optional = {}) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/search',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: {\n        jql: searchString,\n        ...optional,\n      },\n    }));\n  }\n\n  /** Create a Jira user\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/user-createUser)\n   * @name createUser\n   * @function\n   * @param {object} user - Properly Formatted User object\n   */\n  createUser(user) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/user',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: user,\n    }));\n  }\n\n  /** Search user on Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)\n   * @name searchUsers\n   * @function\n   * @param {SearchUserOptions} options\n   */\n  searchUsers({ username, startAt, maxResults, includeActive, includeInactive }) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/user/search',\n      query: {\n        username,\n        startAt: startAt || 0,\n        maxResults: maxResults || 50,\n        includeActive: includeActive || true,\n        includeInactive: includeInactive || false,\n      },\n    }), {\n      followAllRedirects: true,\n    }));\n  }\n\n  /**\n   * @typedef SearchUserOptions\n   * @type {object}\n   * @property {string} username - A query string used to search username, name or e-mail address\n   * @property {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @property {integer} [maxResults=50] - The maximum number of users to return\n   * @property {boolean} [includeActive=true] - If true, then active users are included\n   * in the results\n   * @property {boolean} [includeInactive=false] - If true, then inactive users\n   * are included in the results\n   */\n\n  /** Get all users in group on Jira\n   * @name getUsersInGroup\n   * @function\n   * @param {string} groupname - A query string used to search users in group\n   * @param {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @param {integer} [maxResults=50] - The maximum number of users to return (defaults to 50).\n   */\n  getUsersInGroup(groupname, startAt = 0, maxResults = 50) {\n    return this.doRequest(\n      this.makeRequestHeader(this.makeUri({\n        pathname: '/group',\n        query: {\n          groupname,\n          expand: `users[${startAt}:${maxResults}]`,\n        },\n      }), {\n        followAllRedirects: true,\n      }),\n    );\n  }\n\n  /** Get issues related to a user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)\n   * @name getUsersIssues\n   * @function\n   * @param {string} username - username of user to search for\n   * @param {boolean} open - determines if only open issues should be returned\n   */\n  getUsersIssues(username, open) {\n    const openJql = open ? ' AND status in (Open, \\'In Progress\\', Reopened)' : '';\n    return this.searchJira(\n      `assignee = ${username.replace('@', '\\\\u0040')}${openJql}`, {});\n  }\n\n  /** Add issue to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewIssue\n   * @function\n   * @param {object} issue - Properly Formatted Issue object\n   */\n  addNewIssue(issue) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issue',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: issue,\n    }));\n  }\n\n  /** Add a user as a watcher on an issue\n   * @name addWatcher\n   * @function\n   * @param {string} issueKey - the key of the existing issue\n   * @param {string} username - the jira username to add as a watcher to the issue\n   */\n  addWatcher(issueKey, username) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueKey}/watchers`,\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: JSON.stringify(username),\n    }));\n  }\n\n  /** Delete issue from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   */\n  deleteIssue(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Update issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290878)\n   * @name updateIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueUpdate - update Object as specified by the rest api\n   */\n  updateIssue(issueId, issueUpdate) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      body: issueUpdate,\n      method: 'PUT',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List Components\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listComponents\n   * @function\n   * @param {string} project - key for the project\n   */\n  listComponents(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/components`,\n    })));\n  }\n\n  /** Add component to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewComponent\n   * @function\n   * @param {object} component - Properly Formatted Component\n   */\n  addNewComponent(component) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/component',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: component,\n    }));\n  }\n\n  /** Delete component from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteComponent\n   * @function\n   * @param {string} componentId - the Id of the component to delete\n   */\n  deleteComponent(componentId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/component/${componentId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all fields custom and not that jira knows about.\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listFields\n   * @function\n   */\n  listFields() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/field',\n    })));\n  }\n\n  /** List all priorities jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listPriorities\n   * @function\n   */\n  listPriorities() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/priority',\n    })));\n  }\n\n  /** List Transitions for a specific issue that are available to the current user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listTransitions\n   * @function\n   * @param {string} issueId - get transitions available for the issue\n   */\n  listTransitions(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n      query: {\n        expand: 'transitions.fields',\n      },\n    })));\n  }\n\n  /** Transition issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name transitionsIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueTransition - transition object from the jira rest API\n   */\n  transitionIssue(issueId, issueTransition) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n    }), {\n      body: issueTransition,\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all Viewable Projects\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289193)\n   * @name listProjects\n   * @function\n   */\n  listProjects() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project',\n    })));\n  }\n\n  /** Add a comment to an issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)\n   * @name addComment\n   * @function\n   * @param {string} issueId - Issue to add a comment to\n   * @param {string} comment - string containing comment\n   */\n  addComment(issueId, comment) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/comment`,\n    }), {\n      body: {\n        body: comment,\n      },\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Add a worklog to a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id291617)\n   * @name addWorklog\n   * @function\n   * @param {string} issueId - Issue to add a worklog to\n   * @param {object} worklog - worklog object from the rest API\n   * @param {object} newEstimate - the new value for the remaining estimate field\n   */\n  addWorklog(issueId, worklog, newEstimate) {\n    const header = {\n      uri: this.makeUri({\n        pathname: `/issue/${issueId}/worklog`,\n        query: { adjustEstimate: 'new', newEstimate },\n      }),\n      body: worklog,\n      method: 'POST',\n      'Content-Type': 'application/json',\n      json: true,\n    };\n\n    return this.doRequest(header);\n  }\n\n  /** Delete worklog from issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e1673)\n   * @name deleteWorklog\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {string} worklogId - the Id of the worklog in issue to delete\n   */\n  deleteWorklog(issueId, worklogId) {\n    return this.doRequest(this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/issue/${issueId}/worklog/${worklogId}`,\n      }), {\n        method: 'DELETE',\n        followAllRedirects: true,\n      },\n    ));\n  }\n\n  /** List all Issue Types jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id295946)\n   * @name listIssueTypes\n   * @function\n   */\n  listIssueTypes() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issuetype',\n    })));\n  }\n\n  /** Register a webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name registerWebhook\n   * @function\n   * @param {object} webhook - properly formatted webhook\n   */\n  registerWebhook(webhook) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    }), {\n      method: 'POST',\n      body: webhook,\n    }));\n  }\n\n  /** List all registered webhooks\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name listWebhooks\n   * @function\n   */\n  listWebhooks() {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    })));\n  }\n\n  /** Get a webhook by its ID\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name getWebhook\n   * @function\n   * @param {string} webhookID - id of webhook to get\n   */\n  getWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    })));\n  }\n\n  /** Delete a registered webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name issueLink\n   * @function\n   * @param {string} webhookID - id of the webhook to delete\n   */\n  deleteWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    }), {\n      method: 'DELETE',\n    }));\n  }\n\n  /** Describe the currently authenticated user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id2e865)\n   * @name getCurrentUser\n   * @function\n   */\n  getCurrentUser() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/myself',\n    })));\n  }\n\n  /** Retrieve the backlog of a certain Rapid View\n   * @name getBacklogForRapidView\n   * @function\n   * @param {string} rapidViewId - rapid view id\n   */\n  getBacklogForRapidView(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/xboard/plan/backlog/data',\n      query: {\n        rapidViewId,\n      },\n    })));\n  }\n\n  /** Add attachment to a Issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)\n   * @name addAttachmentOnIssue\n   * @function\n   * @param {string} issueId - issue id\n   * @param {object} readStream - readStream object from fs\n   */\n  addAttachmentOnIssue(issueId, readStream) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/attachments`,\n    }), {\n      method: 'POST',\n      headers: {\n        'X-Atlassian-Token': 'nocheck',\n      },\n      formData: {\n        file: readStream,\n      },\n    }));\n  }\n\n  /** Get list of possible statuses\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)\n   * @name listStatus\n   * @function\n   */\n  listStatus() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/status',\n    })));\n  }\n}\n",
+    "static": true,
     "longname": "src/jira.js",
     "access": null,
     "description": null,
-    "lineNumber": 1,
-    "content": "import request from 'request-promise';\nimport url from 'url';\n\n/**\n * @name JiraApi\n * @class\n * Wrapper for the JIRA Rest Api\n * https://docs.atlassian.com/jira/REST/6.4.8/\n */\nexport default class JiraApi {\n  /**\n   * @constructor\n   * @function\n   * @param {JiraApiOptions} options\n   */\n  constructor(options) {\n    this.protocol = options.protocol || 'http';\n    this.host = options.host;\n    this.port = options.port || null;\n    this.apiVersion = options.apiVersion || '2';\n    this.base = options.base || '';\n    this.strictSSL = options.hasOwnProperty('strictSSL') ? options.strictSSL : true;\n      // This is so we can fake during unit tests\n    this.request = options.request || request;\n    this.webhookVersion = options.webHookVersion || '1.0';\n    this.greenhopperVersion = options.greenhopperVersion || '1.0';\n    this.baseOptions = {};\n\n    if (options.oauth && options.oauth.consumer_key && options.oauth.access_token) {\n      this.baseOptions.oauth = {\n        consumer_key: options.oauth.consumer_key,\n        consumer_secret: options.oauth.consumer_secret,\n        token: options.oauth.access_token,\n        token_secret: options.oauth.access_token_secret,\n        signature_method: options.oauth.signature_method || 'RSA-SHA1',\n      };\n    } else if (options.username && options.password) {\n      this.baseOptions.auth = {\n        user: options.username,\n        pass: options.password,\n      };\n    }\n\n    if (options.timeout) {\n      this.baseOptions.timeout = options.timeout;\n    }\n  }\n\n  /**\n   * @typedef JiraApiOptions\n   * @type {object}\n   * @property {string} [protocol=http] - What protocol to use to connect to\n   * jira? Ex: http|https\n   * @property {string} host - What host is this tool connecting to for the jira\n   * instance? Ex: jira.somehost.com\n   * @property {string} [port] - What port is this tool connecting to jira with? Only needed for\n   * none standard ports. Ex: 8080, 3000, etc\n   * @property {string} [username] - Specify a username for this tool to authenticate all\n   * requests with.\n   * @property {string} [password] - Specify a password for this tool to authenticate all\n   * requests with.\n   * @property {string} [apiVersion=2] - What version of the jira rest api is the instance the\n   * tool is connecting to?\n   * @property {string} [base] - What other url parts exist, if any, before the rest/api/\n   * section?\n   * @property {boolean} [strictSSL=true] - Does this tool require each request to be\n   * authenticated?  Defaults to true.\n   * @property {function} [request] - What method does this tool use to make its requests?\n   * Defaults to request from request-promise\n   * @property {number} [timeout] - Integer containing the number of milliseconds to wait for a\n   * server to send response headers (and start the response body) before aborting the request. Note\n   * that if the underlying TCP connection cannot be established, the OS-wide TCP connection timeout\n   * will overrule the timeout option ([the default in Linux can be anywhere from 20-120 *\n   * seconds](http://www.sekuda.com/overriding_the_default_linux_kernel_20_second_tcp_socket_connect_timeout)).\n   * @property {string} [webhookVersion=1.0] - What webhook version does this api wrapper need to\n   * hit?\n   * @property {string} [greenhopperVersion=1.0] - What webhook version does this api wrapper need\n   * to hit?\n   * @property {OAuth} - Specify an oauth object for this tool to authenticate all requests using\n   * OAuth.\n   */\n\n  /**\n   * @typedef OAuth\n   * @type {object}\n   * @property {string} consumer_key - The consumer entered in Jira Preferences.\n   * @property {string} consumer_secret - The private RSA file.\n   * @property {string} access_token - The generated access token.\n   * @property {string} access_token_secret - The generated access toke secret.\n   * @property {string} signature_method [signature_method=RSA-SHA1] - OAuth signurate methode\n   * Possible values RSA-SHA1, HMAC-SHA1, PLAINTEXT. Jira Cloud supports only RSA-SHA1.\n   */\n\n  /**\n   * @name makeRequestHeader\n   * @function\n   * Creates a requestOptions object based on the default template for one\n   * @param {string} uri\n   * @param {object} [options] - an object containing fields and formatting how the\n   */\n  makeRequestHeader(uri, options = {}) {\n    return {\n      rejectUnauthorized: this.strictSSL,\n      method: options.method || 'GET',\n      uri,\n      json: true,\n      ...options,\n    };\n  }\n\n  /**\n   * @typedef makeRequestHeaderOptions\n   * @type {object}\n   * @property {string} [method] - HTTP Request Method. ie GET, POST, PUT, DELETE\n   */\n\n  /**\n   * @name makeUri\n   * @function\n   * Creates a URI object for a given pathname\n   * @param {string} pathname - The url after the /rest/api/version\n   */\n  makeUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/api/${this.apiVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeWebhookUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeWebhookUri({ pathname }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/webhooks/${this.webhookVersion}${pathname}`,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name makeSprintQueryUri\n   * @function\n   * Creates a URI object for a given pathName\n   * @param {string} pathname - The url after the /rest/\n   */\n  makeSprintQueryUri({ pathname, query }) {\n    const uri = url.format({\n      protocol: this.protocol,\n      hostname: this.host,\n      port: this.port,\n      pathname: `${this.base}/rest/greenhopper/${this.greenhopperVersion}${pathname}`,\n      query,\n    });\n    return decodeURIComponent(uri);\n  }\n\n  /**\n   * @name doRequest\n   * @function\n   * Does a request based on the requestOptions object\n   * @param {object} requestOptions - fields on this object get posted as a request header for\n   * requests to jira\n   */\n  async doRequest(requestOptions) {\n    const options = {\n      ...this.baseOptions,\n      ...requestOptions,\n    };\n\n    const response = await this.request(options);\n\n    if (response) {\n      if (Array.isArray(response.errorMessages) && response.errorMessages.length > 0) {\n        throw new Error(response.errorMessages.join(', '));\n      }\n    }\n\n    return response;\n  }\n\n  /**\n   * @name findIssue\n   * @function\n   * Find an issue in jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290709)\n   * @param {string} issueNumber - The issue number to search for including the project key\n   * @param {string} expand - The resource expansion to return additional fields in the response\n   */\n  findIssue(issueNumber, expand) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}`,\n      query: {\n        expand: expand || '',\n      },\n    })));\n  }\n\n  /**\n   * @name getUnresolvedIssueCount\n   * @function\n   * Get the unresolved issue count\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288524)\n   * @param {string} version - the version of your product you want to find the unresolved\n   * issues of.\n   */\n  async getUnresolvedIssueCount(version) {\n    const requestHeaders = this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/version/${version}/unresolvedIssueCount`,\n      })\n    );\n    const response = await this.doRequest(requestHeaders);\n    return response.issuesUnresolvedCount;\n  }\n\n  /**\n   * @name getProject\n   * @function\n   * Get the Project by project key\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289232)\n   * @param {string} project - key for the project\n   */\n  getProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}`,\n    })));\n  }\n\n/**\n   * @name createProject\n   * @function\n   * Create a new Project\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/project-createProject)\n   * @param {object} project - with specs\n   */\n  createProject(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project/',\n    }), {\n      method: 'POST',\n      body: project,\n    }));\n  }\n\n  /** Find the Rapid View for a specified project\n   * @name findRapidView\n   * @function\n   * @param {string} projectName - name for the project\n   */\n  async findRapidView(projectName) {\n    const response = await this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapidviews/list',\n    })));\n\n    if (typeof projectName === 'undefined' || projectName === null) return response.views;\n\n    const rapidViewResult = response.views\n      .find(x => x.name.toLowerCase() === projectName.toLowerCase());\n\n    return rapidViewResult;\n  }\n\n  /** Get the most recent sprint for a given rapidViewId\n   * @name getLastSprintForRapidView\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  async getLastSprintForRapidView(rapidViewId) {\n    const response = await this.doRequest(\n      this.makeRequestHeader(this.makeSprintQueryUri({\n        pathname: `/sprintquery/${rapidViewId}`,\n      }))\n    );\n    return response.sprints.pop();\n  }\n\n  /** Get the issues for a rapidView / sprint\n   * @name getSprintIssues\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   * @param {string} sprintId - the id for the sprint\n   */\n  getSprintIssues(rapidViewId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: '/rapid/charts/sprintreport',\n      query: {\n        rapidViewId,\n        sprintId,\n      },\n    })));\n  }\n\n  /** Get a list of Sprints belonging to a Rapid View\n   * @name listSprints\n   * @function\n   * @param {string} rapidViewId - the id for the rapid view\n   */\n  listSprints(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeSprintQueryUri({\n      pathname: `/sprintquery/${rapidViewId}`,\n    })));\n  }\n\n  /** Add an issue to the project's current sprint\n   * @name addIssueToSprint\n   * @function\n   * @param {string} issueId - the id of the existing issue\n   * @param {string} sprintId - the id of the sprint to add it to\n   */\n  addIssueToSprint(issueId, sprintId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/sprint/${sprintId}/issues/add`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: {\n        issueKeys: [issueId],\n      },\n    }));\n  }\n\n  /** Create an issue link between two issues\n   * @name issueLink\n   * @function\n   * @param {object} link - a link object formatted how the Jira API specifies\n   */\n  issueLink(link) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issueLink',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: link,\n    }));\n  }\n\n  /** Retrieves the remote links associated with the given issue.\n   * @name getRemoteLinks\n   * @function\n   * @param {string} issueNumber - the issue number to find remote links for.\n   */\n  getRemoteLinks(issueNumber) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    })));\n  }\n\n  /**\n   * @name createRemoteLink\n   * @function\n   * Creates a remote link associated with the given issue.\n   * @param {string} issueNumber - The issue number to create the remotelink under\n   * @param {object} remoteLink - the remotelink object as specified by the Jira API\n   */\n  createRemoteLink(issueNumber, remoteLink) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueNumber}/remotelink`,\n    }), {\n      method: 'POST',\n      body: remoteLink,\n    }));\n  }\n\n  /** Get Versions for a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)\n   * @name getVersions\n   * @function\n   * @param {string} project - A project key to get versions for\n   */\n  getVersions(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/versions`,\n    })));\n  }\n\n  /** Create a version\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)\n   * @name createVersion\n   * @function\n   * @param {string} version - an object of the new version\n   */\n  createVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/version',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Update a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)\n   * @name updateVersion\n   * @function\n   * @param {string} version - an new object of the version to update\n   */\n  updateVersion(version) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${version.id}`,\n    }), {\n      method: 'PUT',\n      followAllRedirects: true,\n      body: version,\n    }));\n  }\n\n  /** Delete a version\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/version-delete)\n   * @name deleteVersion\n   * @function\n   * @param {string} versionId - the ID of the version to delete\n   * @param {string} moveFixIssuesToId - when provided, existing fixVersions will be moved\n   *                 to this ID. Otherwise, the deleted version will be removed from all\n   *                 issue fixVersions.\n   * @param {string} moveAffectedIssuesToId - when provided, existing affectedVersions will\n   *                 be moved to this ID. Otherwise, the deleted version will be removed\n   *                 from all issue affectedVersions.\n   */\n  deleteVersion(versionId, moveFixIssuesToId, moveAffectedIssuesToId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/version/${versionId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n      qs: {\n        moveFixIssuesTo: moveFixIssuesToId,\n        moveAffectedIssuesTo: moveAffectedIssuesToId,\n      },\n    }));\n  }\n\n  /** Pass a search query to Jira\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e4424)\n   * @name searchJira\n   * @function\n   * @param {string} searchString - jira query string in JQL\n   * @param {object} optional - object containing any of the following properties\n   * @param {integer} [optional.startAt=0]: optional starting index number\n   * @param {integer} [optional.maxResults=50]: optional ending index number\n   * @param {array} [optional.fields]: optional array of string names of desired fields\n   */\n  searchJira(searchString, optional = {}) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/search',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: {\n        jql: searchString,\n        ...optional,\n      },\n    }));\n  }\n\n  /** Create a Jira user\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/user-createUser)\n   * @name createUser\n   * @function\n   * @param {object} user - Properly Formatted User object\n   */\n  createUser(user) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/user',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: user,\n    }));\n  }\n\n  /** Search user on Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)\n   * @name searchUsers\n   * @function\n   * @param {SearchUserOptions} options\n   */\n  searchUsers({ username, startAt, maxResults, includeActive, includeInactive }) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/user/search',\n      query: {\n        username,\n        startAt: startAt || 0,\n        maxResults: maxResults || 50,\n        includeActive: includeActive || true,\n        includeInactive: includeInactive || false,\n      },\n    }), {\n      followAllRedirects: true,\n    }));\n  }\n\n  /**\n   * @typedef SearchUserOptions\n   * @type {object}\n   * @property {string} username - A query string used to search username, name or e-mail address\n   * @property {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @property {integer} [maxResults=50] - The maximum number of users to return\n   * @property {boolean} [includeActive=true] - If true, then active users are included\n   * in the results\n   * @property {boolean} [includeInactive=false] - If true, then inactive users\n   * are included in the results\n   */\n\n  /** Get all users in group on Jira\n   * @name getUsersInGroup\n   * @function\n   * @param {string} groupname - A query string used to search users in group\n   * @param {integer} [startAt=0] - The index of the first user to return (0-based)\n   * @param {integer} [maxResults=50] - The maximum number of users to return (defaults to 50).\n   */\n  getUsersInGroup(groupname, startAt = 0, maxResults = 50) {\n    return this.doRequest(\n      this.makeRequestHeader(this.makeUri({\n        pathname: '/group',\n        query: {\n          groupname,\n          expand: `users[${startAt}:${maxResults}]`,\n        },\n      }), {\n        followAllRedirects: true,\n      })\n    );\n  }\n\n  /** Get issues related to a user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)\n   * @name getUsersIssues\n   * @function\n   * @param {string} username - username of user to search for\n   * @param {boolean} open - determines if only open issues should be returned\n   */\n  getUsersIssues(username, open) {\n    const openJql = open ? ' AND status in (Open, \\'In Progress\\', Reopened)' : '';\n    return this.searchJira(\n      `assignee = ${username.replace('@', '\\\\u0040')}${openJql}`, {});\n  }\n\n  /** Add issue to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewIssue\n   * @function\n   * @param {object} issue - Properly Formatted Issue object\n   */\n  addNewIssue(issue) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issue',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: issue,\n    }));\n  }\n\n  /** Add a user as a watcher on an issue\n   * @name addWatcher\n   * @function\n   * @param {string} issueKey - the key of the existing issue\n   * @param {string} username - the jira username to add as a watcher to the issue\n   */\n  addWatcher(issueKey, username) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueKey}/watchers`,\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: JSON.stringify(username),\n    }));\n  }\n\n  /** Delete issue from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   */\n  deleteIssue(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Update issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290878)\n   * @name updateIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueUpdate - update Object as specified by the rest api\n   */\n  updateIssue(issueId, issueUpdate) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}`,\n    }), {\n      body: issueUpdate,\n      method: 'PUT',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List Components\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listComponents\n   * @function\n   * @param {string} project - key for the project\n   */\n  listComponents(project) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/project/${project}/components`,\n    })));\n  }\n\n  /** Add component to Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)\n   * @name addNewComponent\n   * @function\n   * @param {object} component - Properly Formatted Component\n   */\n  addNewComponent(component) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/component',\n    }), {\n      method: 'POST',\n      followAllRedirects: true,\n      body: component,\n    }));\n  }\n\n  /** Delete component from Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)\n   * @name deleteComponent\n   * @function\n   * @param {string} componentId - the Id of the component to delete\n   */\n  deleteComponent(componentId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/component/${componentId}`,\n    }), {\n      method: 'DELETE',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all fields custom and not that jira knows about.\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listFields\n   * @function\n   */\n  listFields() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/field',\n    })));\n  }\n\n  /** List all priorities jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listPriorities\n   * @function\n   */\n  listPriorities() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/priority',\n    })));\n  }\n\n  /** List Transitions for a specific issue that are available to the current user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name listTransitions\n   * @function\n   * @param {string} issueId - get transitions available for the issue\n   */\n  listTransitions(issueId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n      query: {\n        expand: 'transitions.fields',\n      },\n    })));\n  }\n\n  /** Transition issue in Jira\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)\n   * @name transitionsIssue\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {object} issueTransition - transition object from the jira rest API\n   */\n  transitionIssue(issueId, issueTransition) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/transitions`,\n    }), {\n      body: issueTransition,\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** List all Viewable Projects\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289193)\n   * @name listProjects\n   * @function\n   */\n  listProjects() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/project',\n    })));\n  }\n\n  /** Add a comment to an issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)\n   * @name addComment\n   * @function\n   * @param {string} issueId - Issue to add a comment to\n   * @param {string} comment - string containing comment\n   */\n  addComment(issueId, comment) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/comment`,\n    }), {\n      body: {\n        body: comment,\n      },\n      method: 'POST',\n      followAllRedirects: true,\n    }));\n  }\n\n  /** Add a worklog to a project\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id291617)\n   * @name addWorklog\n   * @function\n   * @param {string} issueId - Issue to add a worklog to\n   * @param {object} worklog - worklog object from the rest API\n   * @param {object} newEstimate - the new value for the remaining estimate field\n   */\n  addWorklog(issueId, worklog, newEstimate) {\n    const header = {\n      uri: this.makeUri({\n        pathname: `/issue/${issueId}/worklog`,\n        query: { adjustEstimate: 'new', newEstimate },\n      }),\n      body: worklog,\n      method: 'POST',\n      'Content-Type': 'application/json',\n      json: true,\n    };\n\n    return this.doRequest(header);\n  }\n\n  /** Delete worklog from issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e1673)\n   * @name deleteWorklog\n   * @function\n   * @param {string} issueId - the Id of the issue to delete\n   * @param {string} worklogId - the Id of the worklog in issue to delete\n   */\n  deleteWorklog(issueId, worklogId) {\n    return this.doRequest(this.makeRequestHeader(\n      this.makeUri({\n        pathname: `/issue/${issueId}/worklog/${worklogId}`,\n      }), {\n        method: 'DELETE',\n        followAllRedirects: true,\n      }\n    ));\n  }\n\n  /** List all Issue Types jira knows about\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id295946)\n   * @name listIssueTypes\n   * @function\n   */\n  listIssueTypes() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/issuetype',\n    })));\n  }\n\n  /** Register a webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name registerWebhook\n   * @function\n   * @param {object} webhook - properly formatted webhook\n   */\n  registerWebhook(webhook) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    }), {\n      method: 'POST',\n      body: webhook,\n    }));\n  }\n\n  /** List all registered webhooks\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name listWebhooks\n   * @function\n   */\n  listWebhooks() {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: '/webhook',\n    })));\n  }\n\n  /** Get a webhook by its ID\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name getWebhook\n   * @function\n   * @param {string} webhookID - id of webhook to get\n   */\n  getWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    })));\n  }\n\n  /** Delete a registered webhook\n   * [Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)\n   * @name issueLink\n   * @function\n   * @param {string} webhookID - id of the webhook to delete\n   */\n  deleteWebhook(webhookID) {\n    return this.doRequest(this.makeRequestHeader(this.makeWebhookUri({\n      pathname: `/webhook/${webhookID}`,\n    }), {\n      method: 'DELETE',\n    }));\n  }\n\n  /** Describe the currently authenticated user\n   * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id2e865)\n   * @name getCurrentUser\n   * @function\n   */\n  getCurrentUser() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/myself',\n    })));\n  }\n\n  /** Retrieve the backlog of a certain Rapid View\n   * @name getBacklogForRapidView\n   * @function\n   * @param {string} rapidViewId - rapid view id\n   */\n  getBacklogForRapidView(rapidViewId) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/xboard/plan/backlog/data',\n      query: {\n        rapidViewId,\n      },\n    })));\n  }\n\n  /** Add attachment to a Issue\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)\n   * @name addAttachmentOnIssue\n   * @function\n   * @param {string} issueId - issue id\n   * @param {object} readStream - readStream object from fs\n   */\n  addAttachmentOnIssue(issueId, readStream) {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: `/issue/${issueId}/attachments`,\n    }), {\n      method: 'POST',\n      headers: {\n        'X-Atlassian-Token': 'nocheck',\n      },\n      formData: {\n        file: readStream,\n      },\n    }));\n  }\n\n  /** Get list of possible statuses\n   * [Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)\n   * @name listStatus\n   * @function\n   */\n  listStatus() {\n    return this.doRequest(this.makeRequestHeader(this.makeUri({\n      pathname: '/status',\n    })));\n  }\n}\n"
+    "lineNumber": 1
   },
   {
     "__docId__": 1,
     "kind": "class",
-    "static": true,
-    "variation": null,
     "name": "JiraApi",
     "memberof": "src/jira.js",
+    "static": true,
     "longname": "src/jira.js~JiraApi",
     "access": null,
     "export": true,
@@ -27,10 +24,6 @@
     "description": "",
     "lineNumber": 10,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "JiraApi"
-      },
       {
         "tagName": "@class",
         "tagValue": "Wrapper for the JIRA Rest Api\nhttps://docs.atlassian.com/jira/REST/6.4.8/"
@@ -41,10 +34,11 @@
   {
     "__docId__": 2,
     "kind": "constructor",
-    "static": false,
-    "variation": null,
     "name": "constructor",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#constructor",
     "access": null,
     "description": "",
@@ -70,21 +64,25 @@
         "name": "options",
         "description": ""
       }
-    ],
-    "generator": false
+    ]
   },
   {
     "__docId__": 3,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "protocol",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#protocol",
     "access": null,
     "description": null,
     "lineNumber": 17,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -94,15 +92,20 @@
   {
     "__docId__": 4,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "host",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#host",
     "access": null,
     "description": null,
     "lineNumber": 18,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -112,15 +115,20 @@
   {
     "__docId__": 5,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "port",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#port",
     "access": null,
     "description": null,
     "lineNumber": 19,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -130,15 +138,20 @@
   {
     "__docId__": 6,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "apiVersion",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#apiVersion",
     "access": null,
     "description": null,
     "lineNumber": 20,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -148,15 +161,20 @@
   {
     "__docId__": 7,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "base",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#base",
     "access": null,
     "description": null,
     "lineNumber": 21,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -166,15 +184,20 @@
   {
     "__docId__": 8,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "strictSSL",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#strictSSL",
     "access": null,
     "description": null,
     "lineNumber": 22,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -184,15 +207,20 @@
   {
     "__docId__": 9,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "request",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#request",
     "access": null,
     "description": null,
     "lineNumber": 24,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -202,15 +230,20 @@
   {
     "__docId__": 10,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "webhookVersion",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#webhookVersion",
     "access": null,
     "description": null,
     "lineNumber": 25,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -220,15 +253,20 @@
   {
     "__docId__": 11,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "greenhopperVersion",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#greenhopperVersion",
     "access": null,
     "description": null,
     "lineNumber": 26,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
         "*"
@@ -238,28 +276,32 @@
   {
     "__docId__": 12,
     "kind": "member",
-    "static": false,
-    "variation": null,
     "name": "baseOptions",
     "memberof": "src/jira.js~JiraApi",
+    "static": false,
     "longname": "src/jira.js~JiraApi#baseOptions",
     "access": null,
     "description": null,
     "lineNumber": 27,
     "undocument": true,
+    "unknown": [
+      {
+        "tagName": "@_undocument",
+        "tagValue": ""
+      }
+    ],
     "type": {
       "types": [
-        "*"
+        "{}"
       ]
     }
   },
   {
     "__docId__": 13,
     "kind": "typedef",
-    "static": true,
-    "variation": null,
     "name": "JiraApiOptions",
     "memberof": "src/jira.js~JiraApi",
+    "static": true,
     "longname": "src/jira.js~JiraApi.JiraApiOptions",
     "access": null,
     "description": "",
@@ -416,10 +458,9 @@
   {
     "__docId__": 14,
     "kind": "typedef",
-    "static": true,
-    "variation": null,
     "name": "OAuth",
     "memberof": "src/jira.js~JiraApi",
+    "static": true,
     "longname": "src/jira.js~JiraApi.OAuth",
     "access": null,
     "description": "",
@@ -486,19 +527,16 @@
   {
     "__docId__": 15,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "makeRequestHeader",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#makeRequestHeader",
     "access": null,
     "description": "",
     "lineNumber": 101,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "makeRequestHeader"
-      },
       {
         "tagName": "@function",
         "tagValue": "Creates a requestOptions object based on the default template for one"
@@ -528,18 +566,16 @@
     ],
     "return": {
       "types": [
-        "*"
+        "{\"rejectUnauthorized\": *, \"method\": *, \"uri\": *, \"json\": boolean, ...options: Object}"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 16,
     "kind": "typedef",
-    "static": true,
-    "variation": null,
     "name": "makeRequestHeaderOptions",
     "memberof": "src/jira.js~JiraApi",
+    "static": true,
     "longname": "src/jira.js~JiraApi.makeRequestHeaderOptions",
     "access": null,
     "description": "",
@@ -566,19 +602,16 @@
   {
     "__docId__": 17,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "makeUri",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#makeUri",
     "access": null,
     "description": "",
     "lineNumber": 123,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "makeUri"
-      },
       {
         "tagName": "@function",
         "tagValue": "Creates a URI object for a given pathname"
@@ -600,26 +633,22 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 18,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "makeWebhookUri",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#makeWebhookUri",
     "access": null,
     "description": "",
     "lineNumber": 140,
     "unknown": [
       {
-        "tagName": "@name",
-        "tagValue": "makeWebhookUri"
-      },
-      {
         "tagName": "@function",
         "tagValue": "Creates a URI object for a given pathName"
       }
@@ -640,26 +669,22 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 19,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "makeSprintQueryUri",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#makeSprintQueryUri",
     "access": null,
     "description": "",
     "lineNumber": 156,
     "unknown": [
       {
-        "tagName": "@name",
-        "tagValue": "makeSprintQueryUri"
-      },
-      {
         "tagName": "@function",
         "tagValue": "Creates a URI object for a given pathName"
       }
@@ -680,25 +705,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 20,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "doRequest",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": true,
+    "static": false,
     "longname": "src/jira.js~JiraApi#doRequest",
     "access": null,
     "description": "",
     "lineNumber": 174,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "doRequest"
-      },
       {
         "tagName": "@function",
         "tagValue": "Does a request based on the requestOptions object"
@@ -720,25 +741,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 21,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "findIssue",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#findIssue",
     "access": null,
     "description": "",
     "lineNumber": 199,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "findIssue"
-      },
       {
         "tagName": "@function",
         "tagValue": "Find an issue in jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290709)"
@@ -770,25 +787,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 22,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getUnresolvedIssueCount",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": true,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getUnresolvedIssueCount",
     "access": null,
     "description": "",
     "lineNumber": 216,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getUnresolvedIssueCount"
-      },
       {
         "tagName": "@function",
         "tagValue": "Get the unresolved issue count\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288524)"
@@ -810,25 +823,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 23,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getProject",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getProject",
     "access": null,
     "description": "",
     "lineNumber": 233,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getProject"
-      },
       {
         "tagName": "@function",
         "tagValue": "Get the Project by project key\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289232)"
@@ -850,25 +859,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 24,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "createProject",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#createProject",
     "access": null,
     "description": "",
     "lineNumber": 246,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "createProject"
-      },
       {
         "tagName": "@function",
         "tagValue": "Create a new Project\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/project-createProject)"
@@ -890,25 +895,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 25,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "findRapidView",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": true,
+    "static": false,
     "longname": "src/jira.js~JiraApi#findRapidView",
     "access": null,
     "description": "Find the Rapid View for a specified project",
     "lineNumber": 260,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "findRapidView"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -930,25 +931,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 26,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getLastSprintForRapidView",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": true,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getLastSprintForRapidView",
     "access": null,
     "description": "Get the most recent sprint for a given rapidViewId",
     "lineNumber": 278,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getLastSprintForRapidView"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -970,25 +967,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 27,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getSprintIssues",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getSprintIssues",
     "access": null,
     "description": "Get the issues for a rapidView / sprint",
     "lineNumber": 293,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getSprintIssues"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1020,25 +1013,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 28,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listSprints",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listSprints",
     "access": null,
     "description": "Get a list of Sprints belonging to a Rapid View",
     "lineNumber": 308,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listSprints"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1060,25 +1049,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 29,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addIssueToSprint",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addIssueToSprint",
     "access": null,
     "description": "Add an issue to the project's current sprint",
     "lineNumber": 320,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addIssueToSprint"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1110,25 +1095,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 30,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "issueLink",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#issueLink",
     "access": null,
     "description": "Create an issue link between two issues",
     "lineNumber": 337,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "issueLink"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1150,25 +1131,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 31,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getRemoteLinks",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getRemoteLinks",
     "access": null,
     "description": "Retrieves the remote links associated with the given issue.",
     "lineNumber": 352,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getRemoteLinks"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1190,25 +1167,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 32,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "createRemoteLink",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#createRemoteLink",
     "access": null,
     "description": "",
     "lineNumber": 365,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "createRemoteLink"
-      },
       {
         "tagName": "@function",
         "tagValue": "Creates a remote link associated with the given issue."
@@ -1240,25 +1213,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 33,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getVersions",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getVersions",
     "access": null,
     "description": "Get Versions for a project\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289653)",
     "lineNumber": 380,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getVersions"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1280,25 +1249,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 34,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "createVersion",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#createVersion",
     "access": null,
     "description": "Create a version\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)",
     "lineNumber": 392,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "createVersion"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1320,25 +1285,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 35,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "updateVersion",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#updateVersion",
     "access": null,
     "description": "Update a version\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e510)",
     "lineNumber": 408,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "updateVersion"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1360,25 +1321,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 36,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "deleteVersion",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#deleteVersion",
     "access": null,
     "description": "Delete a version\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/version-delete)",
     "lineNumber": 430,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "deleteVersion"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1420,25 +1377,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 37,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "searchJira",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#searchJira",
     "access": null,
     "description": "Pass a search query to Jira\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e4424)",
     "lineNumber": 453,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "searchJira"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1472,10 +1425,10 @@
         ],
         "spread": false,
         "optional": true,
-        "defaultValue": "0]:",
-        "defaultRaw": "0]:",
+        "defaultValue": "0",
+        "defaultRaw": 0,
         "name": "optional.startAt",
-        "description": "optional starting index number"
+        "description": ": optional starting index number"
       },
       {
         "nullable": null,
@@ -1484,10 +1437,10 @@
         ],
         "spread": false,
         "optional": true,
-        "defaultValue": "50]:",
-        "defaultRaw": "50]:",
+        "defaultValue": "50",
+        "defaultRaw": 50,
         "name": "optional.maxResults",
-        "description": "optional ending index number"
+        "description": ": optional ending index number"
       },
       {
         "nullable": null,
@@ -1496,33 +1449,29 @@
         ],
         "spread": false,
         "optional": true,
-        "name": "optional.fields]:",
-        "description": "optional array of string names of desired fields"
+        "name": "optional.fields",
+        "description": ": optional array of string names of desired fields"
       }
     ],
     "return": {
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 38,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "createUser",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#createUser",
     "access": null,
     "description": "Create a Jira user\n[Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/user-createUser)",
     "lineNumber": 472,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "createUser"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1544,25 +1493,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 39,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "searchUsers",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#searchUsers",
     "access": null,
     "description": "Search user on Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#d2e3756)",
     "lineNumber": 488,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "searchUsers"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1584,16 +1529,14 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 40,
     "kind": "typedef",
-    "static": true,
-    "variation": null,
     "name": "SearchUserOptions",
     "memberof": "src/jira.js~JiraApi",
+    "static": true,
     "longname": "src/jira.js~JiraApi.SearchUserOptions",
     "access": null,
     "description": "",
@@ -1668,19 +1611,16 @@
   {
     "__docId__": 41,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getUsersInGroup",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getUsersInGroup",
     "access": null,
     "description": "Get all users in group on Jira",
     "lineNumber": 522,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getUsersInGroup"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1726,25 +1666,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 42,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getUsersIssues",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getUsersIssues",
     "access": null,
     "description": "Get issues related to a user\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id296043)",
     "lineNumber": 543,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getUsersIssues"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1776,25 +1712,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 43,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addNewIssue",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addNewIssue",
     "access": null,
     "description": "Add issue to Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)",
     "lineNumber": 555,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addNewIssue"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1816,25 +1748,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 44,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addWatcher",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addWatcher",
     "access": null,
     "description": "Add a user as a watcher on an issue",
     "lineNumber": 571,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addWatcher"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1866,25 +1794,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 45,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "deleteIssue",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#deleteIssue",
     "access": null,
     "description": "Delete issue from Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)",
     "lineNumber": 587,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "deleteIssue"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1906,25 +1830,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 46,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "updateIssue",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#updateIssue",
     "access": null,
     "description": "Update issue in Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290878)",
     "lineNumber": 603,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "updateIssue"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1956,25 +1876,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 47,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listComponents",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listComponents",
     "access": null,
     "description": "List Components\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
     "lineNumber": 619,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listComponents"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -1996,25 +1912,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 48,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addNewComponent",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addNewComponent",
     "access": null,
     "description": "Add component to Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290028)",
     "lineNumber": 631,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addNewComponent"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2036,25 +1948,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 49,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "deleteComponent",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#deleteComponent",
     "access": null,
     "description": "Delete component from Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)",
     "lineNumber": 647,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "deleteComponent"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2076,26 +1984,22 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 50,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listFields",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listFields",
     "access": null,
     "description": "List all fields custom and not that jira knows about.\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
     "lineNumber": 661,
     "unknown": [
       {
-        "tagName": "@name",
-        "tagValue": "listFields"
-      },
-      {
         "tagName": "@function",
         "tagValue": ""
       }
@@ -2105,26 +2009,22 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 51,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listPriorities",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listPriorities",
     "access": null,
     "description": "List all priorities jira knows about\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
     "lineNumber": 672,
     "unknown": [
       {
-        "tagName": "@name",
-        "tagValue": "listPriorities"
-      },
-      {
         "tagName": "@function",
         "tagValue": ""
       }
@@ -2134,25 +2034,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 52,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listTransitions",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listTransitions",
     "access": null,
     "description": "List Transitions for a specific issue that are available to the current user\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
     "lineNumber": 684,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listTransitions"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2174,25 +2070,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 53,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "transitionIssue",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#transitionIssue",
     "access": null,
     "description": "Transition issue in Jira\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290489)",
     "lineNumber": 700,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "transitionsIssue"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2224,25 +2116,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 54,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listProjects",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listProjects",
     "access": null,
     "description": "List all Viewable Projects\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id289193)",
     "lineNumber": 715,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listProjects"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2253,25 +2141,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 55,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addComment",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addComment",
     "access": null,
     "description": "Add a comment to an issue\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#id108798)",
     "lineNumber": 728,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addComment"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2303,25 +2187,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 56,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addWorklog",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addWorklog",
     "access": null,
     "description": "Add a worklog to a project\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id291617)",
     "lineNumber": 748,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addWorklog"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2363,25 +2243,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 57,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "deleteWorklog",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#deleteWorklog",
     "access": null,
     "description": "Delete worklog from issue\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#d2e1673)",
     "lineNumber": 770,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "deleteWorklog"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2413,25 +2289,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 58,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listIssueTypes",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listIssueTypes",
     "access": null,
     "description": "List all Issue Types jira knows about\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id295946)",
     "lineNumber": 786,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listIssueTypes"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2442,25 +2314,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 59,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "registerWebhook",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#registerWebhook",
     "access": null,
     "description": "Register a webhook\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
     "lineNumber": 798,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "registerWebhook"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2482,25 +2350,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 60,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listWebhooks",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listWebhooks",
     "access": null,
     "description": "List all registered webhooks\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
     "lineNumber": 812,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listWebhooks"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2511,25 +2375,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 61,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getWebhook",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getWebhook",
     "access": null,
     "description": "Get a webhook by its ID\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
     "lineNumber": 824,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getWebhook"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2551,25 +2411,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 62,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "deleteWebhook",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#deleteWebhook",
     "access": null,
     "description": "Delete a registered webhook\n[Jira Doc](https://developer.atlassian.com/display/JIRADEV/JIRA+Webhooks+Overview)",
     "lineNumber": 836,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "issueLink"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2591,25 +2447,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 63,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getCurrentUser",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getCurrentUser",
     "access": null,
     "description": "Describe the currently authenticated user\n[Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id2e865)",
     "lineNumber": 849,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getCurrentUser"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2620,25 +2472,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 64,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "getBacklogForRapidView",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#getBacklogForRapidView",
     "access": null,
     "description": "Retrieve the backlog of a certain Rapid View",
     "lineNumber": 860,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "getBacklogForRapidView"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2660,25 +2508,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 65,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "addAttachmentOnIssue",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#addAttachmentOnIssue",
     "access": null,
     "description": "Add attachment to a Issue\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/issue/{issueIdOrKey}/attachments-addAttachment)",
     "lineNumber": 876,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "addAttachmentOnIssue"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2710,25 +2554,21 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 66,
     "kind": "method",
-    "static": false,
-    "variation": null,
     "name": "listStatus",
     "memberof": "src/jira.js~JiraApi",
+    "generator": false,
+    "async": false,
+    "static": false,
     "longname": "src/jira.js~JiraApi#listStatus",
     "access": null,
     "description": "Get list of possible statuses\n[Jira Doc](https://docs.atlassian.com/jira/REST/latest/#api/2/status-getStatuses)",
     "lineNumber": 895,
     "unknown": [
-      {
-        "tagName": "@name",
-        "tagValue": "listStatus"
-      },
       {
         "tagName": "@function",
         "tagValue": ""
@@ -2739,17 +2579,15 @@
       "types": [
         "*"
       ]
-    },
-    "generator": false
+    }
   },
   {
     "__docId__": 68,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Infinity",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Infinity",
     "access": null,
     "description": "",
@@ -2758,11 +2596,10 @@
   {
     "__docId__": 69,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "NaN",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~NaN",
     "access": null,
     "description": "",
@@ -2771,11 +2608,10 @@
   {
     "__docId__": 70,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "undefined",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~undefined",
     "access": null,
     "description": "",
@@ -2784,11 +2620,10 @@
   {
     "__docId__": 71,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "null",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~null",
     "access": null,
     "description": "",
@@ -2797,11 +2632,10 @@
   {
     "__docId__": 72,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Object",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Object",
     "access": null,
     "description": "",
@@ -2810,11 +2644,10 @@
   {
     "__docId__": 73,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "object",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~object",
     "access": null,
     "description": "",
@@ -2823,11 +2656,10 @@
   {
     "__docId__": 74,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Function",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Function",
     "access": null,
     "description": "",
@@ -2836,11 +2668,10 @@
   {
     "__docId__": 75,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "function",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~function",
     "access": null,
     "description": "",
@@ -2849,11 +2680,10 @@
   {
     "__docId__": 76,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Boolean",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Boolean",
     "access": null,
     "description": "",
@@ -2862,11 +2692,10 @@
   {
     "__docId__": 77,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "boolean",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~boolean",
     "access": null,
     "description": "",
@@ -2875,11 +2704,10 @@
   {
     "__docId__": 78,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Symbol",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Symbol",
     "access": null,
     "description": "",
@@ -2888,11 +2716,10 @@
   {
     "__docId__": 79,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Error",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Error",
     "access": null,
     "description": "",
@@ -2901,11 +2728,10 @@
   {
     "__docId__": 80,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "EvalError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~EvalError",
     "access": null,
     "description": "",
@@ -2914,11 +2740,10 @@
   {
     "__docId__": 81,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "InternalError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~InternalError",
     "access": null,
     "description": "",
@@ -2927,11 +2752,10 @@
   {
     "__docId__": 82,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "RangeError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~RangeError",
     "access": null,
     "description": "",
@@ -2940,11 +2764,10 @@
   {
     "__docId__": 83,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "ReferenceError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
     "access": null,
     "description": "",
@@ -2953,11 +2776,10 @@
   {
     "__docId__": 84,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "SyntaxError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
     "access": null,
     "description": "",
@@ -2966,11 +2788,10 @@
   {
     "__docId__": 85,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "TypeError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~TypeError",
     "access": null,
     "description": "",
@@ -2979,11 +2800,10 @@
   {
     "__docId__": 86,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "URIError",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~URIError",
     "access": null,
     "description": "",
@@ -2992,11 +2812,10 @@
   {
     "__docId__": 87,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Number",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Number",
     "access": null,
     "description": "",
@@ -3005,11 +2824,10 @@
   {
     "__docId__": 88,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "number",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~number",
     "access": null,
     "description": "",
@@ -3018,11 +2836,10 @@
   {
     "__docId__": 89,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Date",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Date",
     "access": null,
     "description": "",
@@ -3031,11 +2848,10 @@
   {
     "__docId__": 90,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "String",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~String",
     "access": null,
     "description": "",
@@ -3044,11 +2860,10 @@
   {
     "__docId__": 91,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "string",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~string",
     "access": null,
     "description": "",
@@ -3057,11 +2872,10 @@
   {
     "__docId__": 92,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "RegExp",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~RegExp",
     "access": null,
     "description": "",
@@ -3070,11 +2884,10 @@
   {
     "__docId__": 93,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Array",
     "access": null,
     "description": "",
@@ -3083,11 +2896,10 @@
   {
     "__docId__": 94,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Int8Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
     "access": null,
     "description": "",
@@ -3096,11 +2908,10 @@
   {
     "__docId__": 95,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Uint8Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
     "access": null,
     "description": "",
@@ -3109,11 +2920,10 @@
   {
     "__docId__": 96,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Uint8ClampedArray",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
     "access": null,
     "description": "",
@@ -3122,11 +2932,10 @@
   {
     "__docId__": 97,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Int16Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
     "access": null,
     "description": "",
@@ -3135,11 +2944,10 @@
   {
     "__docId__": 98,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Uint16Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
     "access": null,
     "description": "",
@@ -3148,11 +2956,10 @@
   {
     "__docId__": 99,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Int32Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
     "access": null,
     "description": "",
@@ -3161,11 +2968,10 @@
   {
     "__docId__": 100,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Uint32Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
     "access": null,
     "description": "",
@@ -3174,11 +2980,10 @@
   {
     "__docId__": 101,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Float32Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
     "access": null,
     "description": "",
@@ -3187,11 +2992,10 @@
   {
     "__docId__": 102,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Float64Array",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
     "access": null,
     "description": "",
@@ -3200,11 +3004,10 @@
   {
     "__docId__": 103,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Map",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Map",
     "access": null,
     "description": "",
@@ -3213,11 +3016,10 @@
   {
     "__docId__": 104,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Set",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Set",
     "access": null,
     "description": "",
@@ -3226,11 +3028,10 @@
   {
     "__docId__": 105,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "WeakMap",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
     "access": null,
     "description": "",
@@ -3239,11 +3040,10 @@
   {
     "__docId__": 106,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "WeakSet",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
     "access": null,
     "description": "",
@@ -3252,11 +3052,10 @@
   {
     "__docId__": 107,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "ArrayBuffer",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
     "access": null,
     "description": "",
@@ -3265,11 +3064,10 @@
   {
     "__docId__": 108,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "DataView",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~DataView",
     "access": null,
     "description": "",
@@ -3278,11 +3076,10 @@
   {
     "__docId__": 109,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "JSON",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~JSON",
     "access": null,
     "description": "",
@@ -3291,11 +3088,10 @@
   {
     "__docId__": 110,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Promise",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Promise",
     "access": null,
     "description": "",
@@ -3304,11 +3100,10 @@
   {
     "__docId__": 111,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Generator",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Generator",
     "access": null,
     "description": "",
@@ -3317,11 +3112,10 @@
   {
     "__docId__": 112,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "GeneratorFunction",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
     "access": null,
     "description": "",
@@ -3330,11 +3124,10 @@
   {
     "__docId__": 113,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Reflect",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Reflect",
     "access": null,
     "description": "",
@@ -3343,24 +3136,23 @@
   {
     "__docId__": 114,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Proxy",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
     "memberof": "BuiltinExternal/ECMAScriptExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/ECMAScriptExternal.js~Proxy",
     "access": null,
     "description": "",
+    "lineNumber": 193,
     "builtinExternal": true
   },
   {
     "__docId__": 116,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "CanvasRenderingContext2D",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
     "access": null,
     "description": "",
@@ -3369,11 +3161,10 @@
   {
     "__docId__": 117,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "DocumentFragment",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
     "access": null,
     "description": "",
@@ -3382,11 +3173,10 @@
   {
     "__docId__": 118,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Element",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Element",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~Element",
     "access": null,
     "description": "",
@@ -3395,11 +3185,10 @@
   {
     "__docId__": 119,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Event",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Event",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~Event",
     "access": null,
     "description": "",
@@ -3408,11 +3197,10 @@
   {
     "__docId__": 120,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "Node",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/Node",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~Node",
     "access": null,
     "description": "",
@@ -3421,11 +3209,10 @@
   {
     "__docId__": 121,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "NodeList",
     "externalLink": "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~NodeList",
     "access": null,
     "description": "",
@@ -3434,11 +3221,10 @@
   {
     "__docId__": 122,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "XMLHttpRequest",
     "externalLink": "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
     "access": null,
     "description": "",
@@ -3447,14 +3233,14 @@
   {
     "__docId__": 123,
     "kind": "external",
-    "static": true,
-    "variation": null,
     "name": "AudioContext",
     "externalLink": "https://developer.mozilla.org/en/docs/Web/API/AudioContext",
     "memberof": "BuiltinExternal/WebAPIExternal.js",
+    "static": true,
     "longname": "BuiltinExternal/WebAPIExternal.js~AudioContext",
     "access": null,
     "description": "",
+    "lineNumber": 34,
     "builtinExternal": true
   }
 ]
