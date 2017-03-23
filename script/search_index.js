@@ -558,6 +558,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/jira.js~jiraapi#intermediatepath",
+    "class/src/jira.js~JiraApi.html#instance-member-intermediatePath",
+    "src/jira.js~JiraApi#intermediatePath",
+    "member"
+  ],
+  [
     "src/jira.js~jiraapi#issuelink",
     "class/src/jira.js~JiraApi.html#instance-method-issueLink",
     "src/jira.js~JiraApi#issueLink",
@@ -729,6 +735,24 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi.makerequestheaderoptions",
     "typedef/index.html#static-typedef-makeRequestHeaderOptions",
     "src/jira.js~JiraApi.makeRequestHeaderOptions",
+    "typedef"
+  ],
+  [
+    "src/jira.js~jiraapi.makesprintqueryurioptions",
+    "typedef/index.html#static-typedef-makeSprintQueryUriOptions",
+    "src/jira.js~JiraApi.makeSprintQueryUriOptions",
+    "typedef"
+  ],
+  [
+    "src/jira.js~jiraapi.makeurioptions",
+    "typedef/index.html#static-typedef-makeUriOptions",
+    "src/jira.js~JiraApi.makeUriOptions",
+    "typedef"
+  ],
+  [
+    "src/jira.js~jiraapi.makewebhookurioptions",
+    "typedef/index.html#static-typedef-makeWebhookUriOptions",
+    "src/jira.js~JiraApi.makeWebhookUriOptions",
     "typedef"
   ]
 ]
