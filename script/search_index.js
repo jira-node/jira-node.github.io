@@ -408,6 +408,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#createcustomfield",
+    "class/src/jira.js~JiraApi.html#instance-method-createCustomField",
+    "src/jira.js~JiraApi#createCustomField",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#createfieldoption",
+    "class/src/jira.js~JiraApi.html#instance-method-createFieldOption",
+    "src/jira.js~JiraApi#createFieldOption",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#createproject",
     "class/src/jira.js~JiraApi.html#instance-method-createProject",
     "src/jira.js~JiraApi#createProject",
@@ -435,6 +447,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#deletecomponent",
     "class/src/jira.js~JiraApi.html#instance-method-deleteComponent",
     "src/jira.js~JiraApi#deleteComponent",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#deletefieldoption",
+    "class/src/jira.js~JiraApi.html#instance-method-deleteFieldOption",
+    "src/jira.js~JiraApi#deleteFieldOption",
     "method"
   ],
   [
@@ -489,6 +507,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#getcurrentuser",
     "class/src/jira.js~JiraApi.html#instance-method-getCurrentUser",
     "src/jira.js~JiraApi#getCurrentUser",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getfieldoption",
+    "class/src/jira.js~JiraApi.html#instance-method-getFieldOption",
+    "src/jira.js~JiraApi#getFieldOption",
     "method"
   ],
   [
@@ -573,6 +597,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#listcomponents",
     "class/src/jira.js~JiraApi.html#instance-method-listComponents",
     "src/jira.js~JiraApi#listComponents",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#listfieldoptions",
+    "class/src/jira.js~JiraApi.html#instance-method-listFieldOptions",
+    "src/jira.js~JiraApi#listFieldOptions",
     "method"
   ],
   [
@@ -705,6 +735,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#updateversion",
     "class/src/jira.js~JiraApi.html#instance-method-updateVersion",
     "src/jira.js~JiraApi#updateVersion",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#upsertfieldoption",
+    "class/src/jira.js~JiraApi.html#instance-method-upsertFieldOption",
+    "src/jira.js~JiraApi#upsertFieldOption",
     "method"
   ],
   [
