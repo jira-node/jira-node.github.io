@@ -726,6 +726,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#updatecomment",
+    "class/src/jira.js~JiraApi.html#instance-method-updateComment",
+    "src/jira.js~JiraApi#updateComment",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#updateissue",
     "class/src/jira.js~JiraApi.html#instance-method-updateIssue",
     "src/jira.js~JiraApi#updateIssue",
