@@ -516,6 +516,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getissueproperty",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssueProperty",
+    "src/jira.js~JiraApi#getIssueProperty",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getlastsprintforrapidview",
     "class/src/jira.js~JiraApi.html#instance-method-getLastSprintForRapidView",
     "src/jira.js~JiraApi#getLastSprintForRapidView",
