@@ -33,6 +33,7 @@
   <ul>
     
   <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html">JiraApi</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#instance-typedef-makeDevStatusUri">makeDevStatusUri</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-JiraApiOptions">JiraApiOptions</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-OAuth">OAuth</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-SearchUserOptions">SearchUserOptions</a></span></span></li>
@@ -1010,7 +1011,7 @@
         <p>
           
           
-          <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-findIssue">findIssue</a></span></span><span data-ice="signature">(issueNumber: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, expand: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
+          <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-findIssue">findIssue</a></span></span><span data-ice="signature">(issueNumber: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, expand: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, fields: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, properties: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, fieldsByKeys: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -1101,6 +1102,62 @@
         
         <div data-ice="description"><p>Describe the currently authenticated user
 <a href="http://docs.atlassian.com/jira/REST/latest/#id2e865">Jira Doc</a></p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-getDevStatusDetail">getDevStatusDetail</a></span></span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, applicationType: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, dataType: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Get a Dev-Status detail by issue ID</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-getDevStatusSummary">getDevStatusSummary</a></span></span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Get a Dev-Status summary by issue ID</p>
 </div>
       </div>
     </td>
@@ -1437,6 +1494,35 @@
         
         
         <div data-ice="description"><p>Create an issue link between two issues</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/jira.js~JiraApi.html#instance-method-issueNotify">issueNotify</a></span></span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, notificationBody: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Notify people related to issue
+<a href="https://docs.atlassian.com/jira/REST/cloud/#api/2/issue-notify">Jira Doc</a></p>
 </div>
       </div>
     </td>
@@ -2631,7 +2717,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1043">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1072">source</a></span></span>
     </span>
   </h3>
 
@@ -2712,7 +2798,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber873">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber902">source</a></span></span>
     </span>
   </h3>
 
@@ -2793,7 +2879,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber359">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber388">source</a></span></span>
     </span>
   </h3>
 
@@ -2873,7 +2959,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber670">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber699">source</a></span></span>
     </span>
   </h3>
 
@@ -2947,7 +3033,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber594">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber623">source</a></span></span>
     </span>
   </h3>
 
@@ -3021,7 +3107,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber610">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber639">source</a></span></span>
     </span>
   </h3>
 
@@ -3101,7 +3187,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber915">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber944">source</a></span></span>
     </span>
   </h3>
 
@@ -3189,7 +3275,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber701">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber730">source</a></span></span>
     </span>
   </h3>
 
@@ -3263,7 +3349,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber729">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber758">source</a></span></span>
     </span>
   </h3>
 
@@ -3344,7 +3430,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber285">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber314">source</a></span></span>
     </span>
   </h3>
 
@@ -3416,7 +3502,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber404">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber433">source</a></span></span>
     </span>
   </h3>
 
@@ -3495,7 +3581,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber511">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber540">source</a></span></span>
     </span>
   </h3>
 
@@ -3569,7 +3655,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber431">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber460">source</a></span></span>
     </span>
   </h3>
 
@@ -3643,7 +3729,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber686">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber715">source</a></span></span>
     </span>
   </h3>
 
@@ -3717,7 +3803,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber789">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber818">source</a></span></span>
     </span>
   </h3>
 
@@ -3798,7 +3884,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber626">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber655">source</a></span></span>
     </span>
   </h3>
 
@@ -3872,7 +3958,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber469">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber498">source</a></span></span>
     </span>
   </h3>
 
@@ -3964,7 +4050,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1003">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1032">source</a></span></span>
     </span>
   </h3>
 
@@ -4038,7 +4124,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber937">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber966">source</a></span></span>
     </span>
   </h3>
 
@@ -4119,7 +4205,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber213">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber236">source</a></span></span>
     </span>
   </h3>
 
@@ -4188,11 +4274,11 @@ requests to jira</p>
     
     
     
-    <span data-ice="name">findIssue</span><span data-ice="signature">(issueNumber: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, expand: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
+    <span data-ice="name">findIssue</span><span data-ice="signature">(issueNumber: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, expand: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, fields: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, properties: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, fieldsByKeys: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber238">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber264">source</a></span></span>
     </span>
   </h3>
 
@@ -4223,6 +4309,27 @@ requests to jira</p>
       <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The resource expansion to return additional fields in the response</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">fields</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>Comma separated list of field ids or keys to retrieve</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">properties</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>Comma separated list of properties to retrieve</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">fieldsByKeys</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>False by default, used to retrieve fields by key instead of id</p>
 </td>
     </tr>
 </tbody>
@@ -4271,7 +4378,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber299">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber328">source</a></span></span>
     </span>
   </h3>
 
@@ -4344,7 +4451,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1027">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1056">source</a></span></span>
     </span>
   </h3>
 
@@ -4417,7 +4524,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1016">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1045">source</a></span></span>
     </span>
   </h3>
 
@@ -4463,6 +4570,166 @@ requests to jira</p>
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getDevStatusDetail">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getDevStatusDetail</span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, applicationType: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, dataType: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1134">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Get a Dev-Status detail by issue ID</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">issueId</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>id of issue to get</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">applicationType</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>type of application (stash, bitbucket)</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataType</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>info to return (repository, pullrequest)</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getDevStatusSummary">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getDevStatusSummary</span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1118">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Get a Dev-Status summary by issue ID</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">issueId</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>id of issue to get</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-getFieldOption">
     <span class="access" data-ice="access">public</span>
     
@@ -4474,7 +4741,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber776">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber805">source</a></span></span>
     </span>
   </h3>
 
@@ -4555,7 +4822,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber806">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber835">source</a></span></span>
     </span>
   </h3>
 
@@ -4634,7 +4901,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber317">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber346">source</a></span></span>
     </span>
   </h3>
 
@@ -4707,7 +4974,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber272">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber301">source</a></span></span>
     </span>
   </h3>
 
@@ -4779,7 +5046,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber391">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber420">source</a></span></span>
     </span>
   </h3>
 
@@ -4852,7 +5119,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber332">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber361">source</a></span></span>
     </span>
   </h3>
 
@@ -4932,7 +5199,7 @@ requests to jira</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber255">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber284">source</a></span></span>
     </span>
   </h3>
 
@@ -5005,7 +5272,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber561">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber590">source</a></span></span>
     </span>
   </h3>
 
@@ -5094,7 +5361,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber582">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber611">source</a></span></span>
     </span>
   </h3>
 
@@ -5175,7 +5442,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber419">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber448">source</a></span></span>
     </span>
   </h3>
 
@@ -5249,7 +5516,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber991">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1020">source</a></span></span>
     </span>
   </h3>
 
@@ -5323,7 +5590,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber376">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber405">source</a></span></span>
     </span>
   </h3>
 
@@ -5385,6 +5652,87 @@ issues of.</p>
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-issueNotify">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">issueNotify</span><span data-ice="signature">(issueId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, notificationBody: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1093">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Notify people related to issue
+<a href="https://docs.atlassian.com/jira/REST/cloud/#api/2/issue-notify">Jira Doc</a></p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">issueId</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>issue id</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">notificationBody</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>properly formatted body</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-listComponents">
     <span class="access" data-ice="access">public</span>
     
@@ -5396,7 +5744,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber658">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber687">source</a></span></span>
     </span>
   </h3>
 
@@ -5470,7 +5818,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber745">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber774">source</a></span></span>
     </span>
   </h3>
 
@@ -5544,7 +5892,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber716">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber745">source</a></span></span>
     </span>
   </h3>
 
@@ -5601,7 +5949,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber953">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber982">source</a></span></span>
     </span>
   </h3>
 
@@ -5658,7 +6006,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber817">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber846">source</a></span></span>
     </span>
   </h3>
 
@@ -5715,7 +6063,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber860">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber889">source</a></span></span>
     </span>
   </h3>
 
@@ -5772,7 +6120,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber347">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber376">source</a></span></span>
     </span>
   </h3>
 
@@ -5845,7 +6193,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1062">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1107">source</a></span></span>
     </span>
   </h3>
 
@@ -5902,7 +6250,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber829">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber858">source</a></span></span>
     </span>
   </h3>
 
@@ -5976,7 +6324,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber979">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber1008">source</a></span></span>
     </span>
   </h3>
 
@@ -6327,7 +6675,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber965">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber994">source</a></span></span>
     </span>
   </h3>
 
@@ -6401,7 +6749,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber492">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber521">source</a></span></span>
     </span>
   </h3>
 
@@ -6505,7 +6853,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber527">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber556">source</a></span></span>
     </span>
   </h3>
 
@@ -6578,7 +6926,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber845">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber874">source</a></span></span>
     </span>
   </h3>
 
@@ -6659,7 +7007,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber894">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber923">source</a></span></span>
     </span>
   </h3>
 
@@ -6755,7 +7103,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber642">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber671">source</a></span></span>
     </span>
   </h3>
 
@@ -6836,7 +7184,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber447">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber476">source</a></span></span>
     </span>
   </h3>
 
@@ -6910,7 +7258,7 @@ issues of.</p>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber759">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/jira.js.html#lineNumber788">source</a></span></span>
     </span>
   </h3>
 

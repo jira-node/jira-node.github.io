@@ -510,6 +510,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getdevstatusdetail",
+    "class/src/jira.js~JiraApi.html#instance-method-getDevStatusDetail",
+    "src/jira.js~JiraApi#getDevStatusDetail",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getdevstatussummary",
+    "class/src/jira.js~JiraApi.html#instance-method-getDevStatusSummary",
+    "src/jira.js~JiraApi#getDevStatusSummary",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getfieldoption",
     "class/src/jira.js~JiraApi.html#instance-method-getFieldOption",
     "src/jira.js~JiraApi#getFieldOption",
@@ -600,6 +612,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#issuenotify",
+    "class/src/jira.js~JiraApi.html#instance-method-issueNotify",
+    "src/jira.js~JiraApi#issueNotify",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#listcomponents",
     "class/src/jira.js~JiraApi.html#instance-method-listComponents",
     "src/jira.js~JiraApi#listComponents",
@@ -658,6 +676,12 @@ window.esdocSearchIndex = [
     "class/src/jira.js~JiraApi.html#instance-method-listWebhooks",
     "src/jira.js~JiraApi#listWebhooks",
     "method"
+  ],
+  [
+    "src/jira.js~jiraapi#makedevstatusuri",
+    "typedef/index.html#instance-typedef-makeDevStatusUri",
+    "src/jira.js~JiraApi#makeDevStatusUri",
+    "typedef"
   ],
   [
     "src/jira.js~jiraapi#makerequestheader",
