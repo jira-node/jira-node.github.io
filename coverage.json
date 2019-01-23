@@ -1,23 +1,23 @@
 {
-  "coverage": "88.29%",
-  "expectCount": 94,
-  "actualCount": 83,
+  "coverage": "89%",
+  "expectCount": 100,
+  "actualCount": 89,
   "files": {
     "src/jira.js": {
-      "expectCount": 94,
-      "actualCount": 83,
+      "expectCount": 100,
+      "actualCount": 89,
       "undocumentLines": [
+        17,
+        18,
+        19,
         20,
         21,
-        28,
-        27,
-        18,
         22,
-        19,
-        17,
-        25,
         23,
-        26
+        25,
+        26,
+        27,
+        28
       ]
     }
   }
