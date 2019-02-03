@@ -564,9 +564,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getissuechangelog",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssueChangelog",
+    "src/jira.js~JiraApi#getIssueChangelog",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getissueproperty",
     "class/src/jira.js~JiraApi.html#instance-method-getIssueProperty",
     "src/jira.js~JiraApi#getIssueProperty",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getissuewatchers",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssueWatchers",
+    "src/jira.js~JiraApi#getIssueWatchers",
     "method"
   ],
   [
@@ -639,6 +651,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#getusersissues",
     "class/src/jira.js~JiraApi.html#instance-method-getUsersIssues",
     "src/jira.js~JiraApi#getUsersIssues",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getversion",
+    "class/src/jira.js~JiraApi.html#instance-method-getVersion",
+    "src/jira.js~JiraApi#getVersion",
     "method"
   ],
   [
@@ -855,6 +873,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#transitionissue",
     "class/src/jira.js~JiraApi.html#instance-method-transitionIssue",
     "src/jira.js~JiraApi#transitionIssue",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#updateassignee",
+    "class/src/jira.js~JiraApi.html#instance-method-updateAssignee",
+    "src/jira.js~JiraApi#updateAssignee",
     "method"
   ],
   [

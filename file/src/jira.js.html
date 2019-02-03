@@ -523,6 +523,18 @@ export default class JiraApi {
     })));
   }
 
+  /** Get details of single Version in project
+   * [Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/version-getVersion)
+   * @name getVersion
+   * @function
+   * @param {string} version - The id of this version
+   */
+  getVersion(version) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/version/${version}`,
+    })));
+  }
+
   /** Create a version
    * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id288232)
    * @name createVersion
@@ -589,6 +601,7 @@ export default class JiraApi {
    * @param {integer} [optional.startAt=0]: optional starting index number
    * @param {integer} [optional.maxResults=50]: optional ending index number
    * @param {array} [optional.fields]: optional array of string names of desired fields
+   * @param {array} [optional.expand]: optional array of string names of desired expand nodes
    */
   searchJira(searchString, optional = {}) {
     return this.doRequest(this.makeRequestHeader(this.makeUri({
@@ -718,6 +731,23 @@ export default class JiraApi {
       method: &apos;POST&apos;,
       followAllRedirects: true,
       body: username,
+    }));
+  }
+
+  /** Change an assignee on an issue
+   * [Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/issue-assign)
+   * @name assignee
+   * @function
+   * @param {string} issueKey - the key of the existing issue
+   * @param {string} assigneeName - the jira username to add as a new assignee to the issue
+   */
+  updateAssignee(issueKey, assigneeName) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueKey}/assignee`,
+    }), {
+      method: &apos;PUT&apos;,
+      followAllRedirects: true,
+      body: { name: assigneeName },
     }));
   }
 
@@ -932,6 +962,32 @@ export default class JiraApi {
   getIssueProperty(issueNumber, property) {
     return this.doRequest(this.makeRequestHeader(this.makeUri({
       pathname: `/issue/${issueNumber}/properties/${property}`,
+    })));
+  }
+
+  /**
+   * @name getIssueChangelog
+   * @function
+   * List all changes for an issue, sorted by date, starting from the latest
+   * [Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/issue/{issueIdOrKey}/changelog)
+   * @param {string} issueNumber - The issue number to search for including the project key
+   */
+  getIssueChangelog(issueNumber) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueNumber}/changelog`,
+    })));
+  }
+
+  /**
+   * @name getIssueWatchers
+   * @function
+   * List all watchers for an issue
+   * [Jira Doc](http://docs.atlassian.com/jira/REST/cloud/#api/2/issue-getIssueWatchers)
+   * @param {string} issueNumber - The issue number to search for including the project key
+   */
+  getIssueWatchers(issueNumber) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueNumber}/watchers`,
     })));
   }
 
