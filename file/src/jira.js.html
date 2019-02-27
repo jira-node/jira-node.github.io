@@ -132,8 +132,9 @@ export default class JiraApi {
    * hit?
    * @property {string} [greenhopperVersion=1.0] - What webhook version does this api wrapper need
    * to hit?
-   * @property {OAuth} - Specify an oauth object for this tool to authenticate all requests using
-   * OAuth.
+   * @property {OAuth} [oauth] - Specify an OAuth object for this tool to authenticate all requests
+   * using OAuth.
+   * @property {string} [bearer] - Specify an OAuth bearer token to authenticate all requests with.
    */
 
   /**
@@ -589,6 +590,24 @@ export default class JiraApi {
         moveFixIssuesTo: moveFixIssuesToId,
         moveAffectedIssuesTo: moveAffectedIssuesToId,
       },
+    }));
+  }
+
+  /** Move version
+   * [Jira Doc](https://docs.atlassian.com/jira/REST/cloud/#api/2/version-moveVersion)
+   * @name moveVersion
+   * @function
+   * @param {string} versionId - the ID of the version to delete
+   * @param {string} position - an object of the new position
+   */
+
+  moveVersion(versionId, position) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/version/${versionId}/move`,
+    }), {
+      method: &apos;POST&apos;,
+      followAllRedirects: true,
+      body: position,
     }));
   }
 
@@ -1130,6 +1149,20 @@ export default class JiraApi {
         method: &apos;DELETE&apos;,
         followAllRedirects: true,
       },
+    ));
+  }
+
+  /** Get worklogs list from a given issue
+   * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-api-3-issue-issueIdOrKey-worklog-get)
+   * @name getIssueWorklogs
+   * @function
+   * @param {string} issueId - the Id of the issue to find worklogs for
+   */
+  getIssueWorklogs(issueId) {
+    return this.doRequest(this.makeRequestHeader(
+      this.makeUri({
+        pathname: `/issue/${issueId}/worklog`,
+      }),
     ));
   }
 
@@ -1743,6 +1776,18 @@ export default class JiraApi {
       method: &apos;PUT&apos;,
       body,
     }));
+  }
+
+  /**
+   * @name getServerInfo
+   * @function
+   * Get server info
+   * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v2/#api-api-2-serverInfo-get)
+   */
+  getServerInfo() {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: &apos;/serverInfo&apos;,
+    })));
   }
 }
 </code></pre>

@@ -582,6 +582,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getissueworklogs",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssueWorklogs",
+    "src/jira.js~JiraApi#getIssueWorklogs",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getissuesforbacklog",
     "class/src/jira.js~JiraApi.html#instance-method-getIssuesForBacklog",
     "src/jira.js~JiraApi#getIssuesForBacklog",
@@ -627,6 +633,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#getremotelinks",
     "class/src/jira.js~JiraApi.html#instance-method-getRemoteLinks",
     "src/jira.js~JiraApi#getRemoteLinks",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getserverinfo",
+    "class/src/jira.js~JiraApi.html#instance-method-getServerInfo",
+    "src/jira.js~JiraApi#getServerInfo",
     "method"
   ],
   [
@@ -807,6 +819,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#movetobacklog",
     "class/src/jira.js~JiraApi.html#instance-method-moveToBacklog",
     "src/jira.js~JiraApi#moveToBacklog",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#moveversion",
+    "class/src/jira.js~JiraApi.html#instance-method-moveVersion",
+    "src/jira.js~JiraApi#moveVersion",
     "method"
   ],
   [
