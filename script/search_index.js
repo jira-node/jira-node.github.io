@@ -456,6 +456,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#downloadattachment",
+    "class/src/jira.js~JiraApi.html#instance-method-downloadAttachment",
+    "src/jira.js~JiraApi#downloadAttachment",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#findissue",
     "class/src/jira.js~JiraApi.html#instance-method-findIssue",
     "src/jira.js~JiraApi#findIssue",
