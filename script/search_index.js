@@ -864,6 +864,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#relatedissuecounts",
+    "class/src/jira.js~JiraApi.html#instance-method-relatedIssueCounts",
+    "src/jira.js~JiraApi#relatedIssueCounts",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#request",
     "class/src/jira.js~JiraApi.html#instance-member-request",
     "src/jira.js~JiraApi#request",
