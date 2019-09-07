@@ -306,6 +306,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#addcommentadvanced",
+    "class/src/jira.js~JiraApi.html#instance-method-addCommentAdvanced",
+    "src/jira.js~JiraApi#addCommentAdvanced",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#addissuetosprint",
     "class/src/jira.js~JiraApi.html#instance-method-addIssueToSprint",
     "src/jira.js~JiraApi#addIssueToSprint",
@@ -462,6 +468,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#estimateissueforboard",
+    "class/src/jira.js~JiraApi.html#instance-method-estimateIssueForBoard",
+    "src/jira.js~JiraApi#estimateIssueForBoard",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#findissue",
     "class/src/jira.js~JiraApi.html#instance-method-findIssue",
     "src/jira.js~JiraApi#findIssue",
@@ -570,9 +582,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getissue",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssue",
+    "src/jira.js~JiraApi#getIssue",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getissuechangelog",
     "class/src/jira.js~JiraApi.html#instance-method-getIssueChangelog",
     "src/jira.js~JiraApi#getIssueChangelog",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getissueestimationforboard",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssueEstimationForBoard",
+    "src/jira.js~JiraApi#getIssueEstimationForBoard",
     "method"
   ],
   [
@@ -858,6 +882,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#rankissues",
+    "class/src/jira.js~JiraApi.html#instance-method-rankIssues",
+    "src/jira.js~JiraApi#rankIssues",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#registerwebhook",
     "class/src/jira.js~JiraApi.html#instance-method-registerWebhook",
     "src/jira.js~JiraApi#registerWebhook",
@@ -933,6 +963,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#updateversion",
     "class/src/jira.js~JiraApi.html#instance-method-updateVersion",
     "src/jira.js~JiraApi#updateVersion",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#updatedworklogs",
+    "class/src/jira.js~JiraApi.html#instance-method-updatedWorklogs",
+    "src/jira.js~JiraApi#updatedWorklogs",
     "method"
   ],
   [
