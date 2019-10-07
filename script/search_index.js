@@ -714,6 +714,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getworklogs",
+    "class/src/jira.js~JiraApi.html#instance-method-getWorklogs",
+    "src/jira.js~JiraApi#getWorklogs",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#greenhopperversion",
     "class/src/jira.js~JiraApi.html#instance-member-greenhopperVersion",
     "src/jira.js~JiraApi#greenhopperVersion",
