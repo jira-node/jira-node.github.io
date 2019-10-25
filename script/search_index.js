@@ -768,6 +768,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#listissuelinktypes",
+    "class/src/jira.js~JiraApi.html#instance-method-listIssueLinkTypes",
+    "src/jira.js~JiraApi#listIssueLinkTypes",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#listissuetypes",
     "class/src/jira.js~JiraApi.html#instance-method-listIssueTypes",
     "src/jira.js~JiraApi#listIssueTypes",
