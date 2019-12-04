@@ -438,6 +438,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#deleteissuelink",
+    "class/src/jira.js~JiraApi.html#instance-method-deleteIssueLink",
+    "src/jira.js~JiraApi#deleteIssueLink",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#deleteversion",
     "class/src/jira.js~JiraApi.html#instance-method-deleteVersion",
     "src/jira.js~JiraApi#deleteVersion",
