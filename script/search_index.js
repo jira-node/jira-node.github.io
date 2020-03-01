@@ -690,6 +690,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getuser",
+    "class/src/jira.js~JiraApi.html#instance-method-getUser",
+    "src/jira.js~JiraApi#getUser",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getusers",
+    "class/src/jira.js~JiraApi.html#instance-method-getUsers",
+    "src/jira.js~JiraApi#getUsers",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getusersingroup",
     "class/src/jira.js~JiraApi.html#instance-method-getUsersInGroup",
     "src/jira.js~JiraApi#getUsersInGroup",
