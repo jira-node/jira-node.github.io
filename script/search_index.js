@@ -420,6 +420,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#deletecomment",
+    "class/src/jira.js~JiraApi.html#instance-method-deleteComment",
+    "src/jira.js~JiraApi#deleteComment",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#deletecomponent",
     "class/src/jira.js~JiraApi.html#instance-method-deleteComponent",
     "src/jira.js~JiraApi#deleteComponent",
@@ -543,6 +549,18 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#getboardproperty",
     "class/src/jira.js~JiraApi.html#instance-method-getBoardProperty",
     "src/jira.js~JiraApi#getBoardProperty",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getcomment",
+    "class/src/jira.js~JiraApi.html#instance-method-getComment",
+    "src/jira.js~JiraApi#getComment",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getcomments",
+    "class/src/jira.js~JiraApi.html#instance-method-getComments",
+    "src/jira.js~JiraApi#getComments",
     "method"
   ],
   [
@@ -969,6 +987,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#updateassignee",
     "class/src/jira.js~JiraApi.html#instance-method-updateAssignee",
     "src/jira.js~JiraApi#updateAssignee",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#updateassigneewithid",
+    "class/src/jira.js~JiraApi.html#instance-method-updateAssigneeWithId",
+    "src/jira.js~JiraApi#updateAssigneeWithId",
     "method"
   ],
   [

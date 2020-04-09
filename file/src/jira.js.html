@@ -188,7 +188,9 @@ export default class JiraApi {
    * Creates a URI object for a given pathname
    * @param {object} [options] - an object containing path information
    */
-  makeUri({ pathname, query, intermediatePath }) {
+  makeUri({
+    pathname, query, intermediatePath, encode = false,
+  }) {
     const intermediateToUse = this.intermediatePath || intermediatePath;
     const tempPath = intermediateToUse || `/rest/api/${this.apiVersion}`;
     const uri = url.format({
@@ -198,7 +200,7 @@ export default class JiraApi {
       pathname: `${this.base}${tempPath}${pathname}`,
       query,
     });
-    return decodeURIComponent(uri);
+    return encode ? encodeURI(uri) : decodeURIComponent(uri);
   }
 
   /**
@@ -361,6 +363,7 @@ export default class JiraApi {
     return this.doRequest(this.makeRequestHeader(this.makeUri({
       pathname: `/attachment/${attachment.id}/${attachment.filename}`,
       intermediatePath: &apos;/secure&apos;,
+      encode: true,
     }), { json: false, encoding: null }));
   }
 
@@ -834,6 +837,23 @@ export default class JiraApi {
     }));
   }
 
+  /** Change an assignee on an issue
+   * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v2/#api-rest-api-2-issue-issueIdOrKey-assignee-put)
+   * @name updateAssigneeWithId
+   * @function
+   * @param {string} issueKey - the key of the existing issue
+   * @param {string} userId - the jira username to add as a new assignee to the issue
+   */
+  updateAssigneeWithId(issueKey, userId) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueKey}/assignee`,
+    }), {
+      method: &apos;PUT&apos;,
+      followAllRedirects: true,
+      body: { accountId: userId },
+    }));
+  }
+
   /** Delete issue from Jira
    * [Jira Doc](http://docs.atlassian.com/jira/REST/latest/#id290791)
    * @name deleteIssue
@@ -1200,6 +1220,50 @@ export default class JiraApi {
         ...options,
       },
       method: &apos;PUT&apos;,
+      followAllRedirects: true,
+    }));
+  }
+
+  /**
+   * @name getComments
+   * @function
+   * Get Comments by IssueId.
+   * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-rest-api-3-comment-list-post)
+   * @param {number} issueId - this issue this comment is on
+   */
+  getComments(issueId) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueId}/comment`,
+    })));
+  }
+
+  /**
+   * @name getComment
+   * @function
+   * Get Comment by Id.
+   * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-rest-api-3-comment-list-post)
+   * @param {number} issueId - this issue this comment is on
+   * @param {number} commentId - the id of the comment
+   */
+  getComment(issueId, commentId) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueId}/comment/${commentId}`,
+    })));
+  }
+
+  /**
+   * @name deleteComment
+   * @function
+   * Delete Comments by Id.
+   * [Jira Doc](https://developer.atlassian.com/cloud/jira/platform/rest/v3/#api-rest-api-3-comment-list-post)
+   * @param {number} issueId - this issue this comment is on
+   * @param {number} commentId - the id of the comment
+   */
+  deleteComment(issueId, commentId) {
+    return this.doRequest(this.makeRequestHeader(this.makeUri({
+      pathname: `/issue/${issueId}/comment/${commentId}`,
+    }), {
+      method: &apos;DELETE&apos;,
       followAllRedirects: true,
     }));
   }
