@@ -624,6 +624,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#getissuecreatemetadata",
+    "class/src/jira.js~JiraApi.html#instance-method-getIssueCreateMetadata",
+    "src/jira.js~JiraApi#getIssueCreateMetadata",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getissueestimationforboard",
     "class/src/jira.js~JiraApi.html#instance-method-getIssueEstimationForBoard",
     "src/jira.js~JiraApi#getIssueEstimationForBoard",
