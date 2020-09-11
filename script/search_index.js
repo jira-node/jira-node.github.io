@@ -498,6 +498,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#genericget",
+    "class/src/jira.js~JiraApi.html#instance-method-genericGet",
+    "src/jira.js~JiraApi#genericGet",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#getallboards",
     "class/src/jira.js~JiraApi.html#instance-method-getAllBoards",
     "src/jira.js~JiraApi#getAllBoards",
