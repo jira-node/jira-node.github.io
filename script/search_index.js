@@ -408,6 +408,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#deleteattachment",
+    "class/src/jira.js~JiraApi.html#instance-method-deleteAttachment",
+    "src/jira.js~JiraApi#deleteAttachment",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#deleteboard",
     "class/src/jira.js~JiraApi.html#instance-method-deleteBoard",
     "src/jira.js~JiraApi#deleteBoard",
