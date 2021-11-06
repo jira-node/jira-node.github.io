@@ -504,6 +504,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/jira.js~jiraapi#genericagileget",
+    "class/src/jira.js~JiraApi.html#instance-method-genericAgileGet",
+    "src/jira.js~JiraApi#genericAgileGet",
+    "method"
+  ],
+  [
     "src/jira.js~jiraapi#genericget",
     "class/src/jira.js~JiraApi.html#instance-method-genericGet",
     "src/jira.js~JiraApi#genericGet",
@@ -717,6 +723,12 @@ window.esdocSearchIndex = [
     "src/jira.js~jiraapi#getserverinfo",
     "class/src/jira.js~JiraApi.html#instance-method-getServerInfo",
     "src/jira.js~JiraApi#getServerInfo",
+    "method"
+  ],
+  [
+    "src/jira.js~jiraapi#getsprint",
+    "class/src/jira.js~JiraApi.html#instance-method-getSprint",
+    "src/jira.js~JiraApi#getSprint",
     "method"
   ],
   [
